@@ -1,0 +1,10 @@
+"RUXXEN LPG GAS PLANT - CASHIER PERFORMANCE REPORT"
+"Period: Aug 01, 2025 - Aug 31, 2025"
+"Generated: Aug 19, 2025 20:31:34"
+
+"CASHIER PERFORMANCE SUMMARY"
+Cashier,Email,"Total Sales (₦)","Quantity Sold (kg)",Transactions,"Avg. Transaction (₦)"
+"Aliyu Yusuf",admin@gmail.com,0.00,0.00,0,0.00
+
+"DETAILED TRANSACTIONS BY CASHIER"
+"Transaction #",Date,Cashier,Customer,"Quantity (kg)",Price/kg,"Total (₦)","Payment Type",Status
