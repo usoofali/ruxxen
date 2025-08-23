@@ -3,9 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// Setup routes (excluded from setup check)
+Route::middleware(['web'])->group(function () {
+    Route::get('/setup', \App\Livewire\Setup\Welcome::class)->name('setup.welcome');
+});
+
+// Apply setup check middleware to all other routes
+Route::middleware(['check.setup'])->group(function () {
+    Route::get('/', function () {
+        return view('welcome');
+    })->name('home');
 
 // Dashboard route using Livewire component
 Volt::route('dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
@@ -52,3 +59,4 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+});
