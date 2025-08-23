@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('key')->unique();
             $table->text('value')->nullable();
-            $table->string('type')->default('string'); // string, boolean, integer, json
+            $table->string('type')->default('string'); // string, boolean, json, integer
             $table->text('description')->nullable();
             $table->timestamps();
         });

@@ -2,17 +2,19 @@
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Http\Controllers\SetupController;
 
-// Setup routes (excluded from setup check)
-Route::middleware(['web'])->group(function () {
-    Route::get('/setup', \App\Livewire\Setup\Welcome::class)->name('setup.welcome');
+// Setup routes (no middleware to allow access during setup)
+Route::prefix('setup')->name('setup.')->group(function () {
+    Route::get('/', [SetupController::class, 'index'])->name('index');
+    Route::post('/run', [SetupController::class, 'runSetup'])->name('run');
+    Route::get('/progress', [SetupController::class, 'getProgress'])->name('progress');
+    Route::post('/reset', [SetupController::class, 'resetSetup'])->name('reset');
 });
 
-// Apply setup check middleware to all other routes
-Route::middleware(['check.setup'])->group(function () {
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('home');
+Route::get('/', function () {
+    return view('welcome');
+})->name('home');
 
 // Dashboard route using Livewire component
 Volt::route('dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('dashboard');
@@ -59,4 +61,3 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
-});

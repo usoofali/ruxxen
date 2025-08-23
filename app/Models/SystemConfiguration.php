@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class SystemConfiguration extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'key',
         'value',
@@ -17,52 +20,41 @@ class SystemConfiguration extends Model
     ];
 
     protected $casts = [
-        'value' => 'string',
+        'value' => 'json',
     ];
 
     /**
-     * Get a configuration value by key
+     * Get configuration value by key
      */
-    public static function getValue(string $key, mixed $default = null): mixed
+    public static function getValue(string $key, $default = null)
     {
-        $cacheKey = "system_config_{$key}";
+        $config = static::where('key', $key)->first();
         
-        return Cache::remember($cacheKey, 3600, function () use ($key, $default) {
-            $config = static::where('key', $key)->first();
-            
-            if (!$config) {
-                return $default;
-            }
+        if (!$config) {
+            return $default;
+        }
 
-            return match ($config->type) {
-                'boolean' => filter_var($config->value, FILTER_VALIDATE_BOOLEAN),
-                'integer' => (int) $config->value,
-                'json' => json_decode($config->value, true),
-                default => $config->value,
-            };
-        });
+        return match ($config->type) {
+            'boolean' => (bool) $config->value,
+            'integer' => (int) $config->value,
+            'json' => is_string($config->value) ? json_decode($config->value, true) : $config->value,
+            default => $config->value,
+        };
     }
 
     /**
-     * Set a configuration value
+     * Set configuration value by key
      */
-    public static function setValue(string $key, mixed $value, string $type = 'string', ?string $description = null): void
+    public static function setValue(string $key, $value, string $type = 'string', ?string $description = null): void
     {
-        $config = static::firstOrNew(['key' => $key]);
-        
-        $config->value = match ($type) {
-            'boolean' => $value ? '1' : '0',
-            'integer' => (string) $value,
-            'json' => json_encode($value),
-            default => (string) $value,
-        };
-        
-        $config->type = $type;
-        $config->description = $description;
-        $config->save();
-
-        // Clear cache
-        Cache::forget("system_config_{$key}");
+        static::updateOrCreate(
+            ['key' => $key],
+            [
+                'value' => $value,
+                'type' => $type,
+                'description' => $description,
+            ]
+        );
     }
 
     /**
@@ -82,9 +74,9 @@ class SystemConfiguration extends Model
     }
 
     /**
-     * Get setup completion status
+     * Get setup progress
      */
-    public static function getSetupStatus(): array
+    public static function getSetupProgress(): array
     {
         return [
             'database_migrated' => static::getValue('database_migrated', false),
@@ -95,21 +87,18 @@ class SystemConfiguration extends Model
     }
 
     /**
-     * Mark a setup step as completed
+     * Mark setup step as completed
      */
-    public static function markSetupStepCompleted(string $step): void
+    public static function markStepCompleted(string $step): void
     {
         static::setValue($step, true, 'boolean', "Setup step: {$step}");
     }
 
     /**
-     * Clear all configuration cache
+     * Get all configuration as array
      */
-    public static function clearCache(): void
+    public static function getAllConfigurations(): array
     {
-        $configs = static::all();
-        foreach ($configs as $config) {
-            Cache::forget("system_config_{$config->key}");
-        }
+        return static::all()->pluck('value', 'key')->toArray();
     }
 }
