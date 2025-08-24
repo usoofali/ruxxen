@@ -13,11 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'auth.role' => \App\Http\Middleware\CheckRole::class,
-            'setup.check' => \App\Http\Middleware\CheckSetupStatus::class,
         ]);
-        
-        // Apply setup check middleware globally
-        $middleware->append(\App\Http\Middleware\CheckSetupStatus::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -2,15 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
-use App\Http\Controllers\SetupController;
-
-// Setup routes (no middleware to allow access during setup)
-Route::prefix('setup')->name('setup.')->group(function () {
-    Route::get('/', [SetupController::class, 'index'])->name('index');
-    Route::post('/run', [SetupController::class, 'runSetup'])->name('run');
-    Route::get('/progress', [SetupController::class, 'getProgress'])->name('progress');
-    Route::post('/reset', [SetupController::class, 'resetSetup'])->name('reset');
-});
 
 Route::get('/', function () {
     return view('welcome');
