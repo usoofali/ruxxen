@@ -41,6 +41,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
            Route::middleware(['auth.role:admin,cashier'])->group(function () {
                Volt::route('settings/company/view', 'settings.company-view')->name('settings.company.view');
            });
+
+           // Sync Monitor Route (admin only)
+           Route::middleware(['auth.role:cahsier'])->group(function () {
+               Volt::route('admin/sync', 'sync-monitor')->name('admin.sync');
+           });
 });
 
 Route::middleware(['auth'])->group(function () {

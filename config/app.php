@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Sync Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Configuration for Master-Slave synchronization system
+    |
+    */
+
+    'master_url' => env('MASTER_URL', 'http://localhost:8000'),
+    'sync_enabled' => env('SYNC_ENABLED', true),
+    'sync_interval' => env('SYNC_INTERVAL', 5), // minutes
+
 ];
