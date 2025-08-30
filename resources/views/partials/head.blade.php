@@ -10,10 +10,10 @@
 <link rel="preconnect" href="https://fonts.bunny.net">
 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
-@if(app()->environment('local') && !file_exists(public_path('build/manifest.json')))
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-@else
+@if(file_exists(public_path('build/manifest.json')))
     <link rel="stylesheet" href="{{ asset('build/assets/app-TUUI5zqS.css') }}">
     <script type="module" src="{{ asset('build/assets/app-l0sNRNKZ.js') }}"></script>
+@else
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 @endif
 @fluxAppearance
