@@ -200,7 +200,7 @@ class SyncCommand extends Command
         try {
             $response = Http::timeout(30)->get($masterUrl . '/api/sync/download', [
                 'last_synced_at' => $lastSyncedAt,
-                'tables' => ['inventories', 'transactions', 'inventory_adjustments']
+                'tables' => ['inventories', 'transactions', 'inventory_adjustments', 'company_settings', 'users']
             ]);
 
             if ($response->successful()) {

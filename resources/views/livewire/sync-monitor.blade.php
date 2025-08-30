@@ -50,7 +50,7 @@ new class extends Component {
 
 <div class="p-6 bg-white rounded-lg shadow-md">
     <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-gray-900">Synchronization Monitor</h2>
+        <h2 class="text-2xl font-bold text-gray-900">Cashier Sync Monitor</h2>
         <div class="flex space-x-2">
             <button 
                 wire:click="refreshStatus" 
