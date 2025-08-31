@@ -106,7 +106,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $customerName = $transaction->customer_name ?: 'Walk-in Customer';
         $customerPhone = $transaction->customer_phone ?: '';
         
-        $logoHtml = $companyLogo ? "<img src='$companyLogo' style='width: 80px; height: 80px; object-fit: contain; margin: 0 auto 15px; display: block;' alt='Company Logo'>" : "";
+        $logoHtml = $companyLogo ? "<img src='$companyLogo' style='width: 120px; height: 120px; object-fit: contain; margin: 0 auto 15px; display: block;' alt='Company Logo'>" : "";
         
         return "
         <div style='font-family: monospace; width: 56mm; max-width: 56mm; margin: 0 auto;'>
