@@ -106,55 +106,55 @@ new #[Layout('components.layouts.app')] class extends Component {
         $customerName = $transaction->customer_name ?: 'Walk-in Customer';
         $customerPhone = $transaction->customer_phone ?: '';
         
-        $logoHtml = $companyLogo ? "<img src='$companyLogo' style='width: 60px; height: 60px; object-fit: contain; margin: 0 auto 10px; display: block;' alt='Company Logo'>" : "";
+        $logoHtml = $companyLogo ? "<img src='$companyLogo' style='width: 80px; height: 80px; object-fit: contain; margin: 0 auto 15px; display: block;' alt='Company Logo'>" : "";
         
         return "
-        <div style='font-family: monospace; width: 80mm; max-width: 80mm; margin: 0 auto;'>
+        <div style='font-family: monospace; width: 58mm; max-width: 58mm; margin: 0 auto;'>
             <!-- Header -->
-            <div style='text-align: center; margin-bottom: 10px;'>
+            <div style='text-align: center; margin-bottom: 15px;'>
                 $logoHtml
-                <h1 style='font-size: 14px; font-weight: bold; margin: 0;'>$companyName</h1>
-                <p style='font-size: 10px; margin: 2px 0;'>$companyAddress</p>
-                <p style='font-size: 10px; margin: 2px 0;'>$companyPhone</p>
+                <h1 style='font-size: 16px; font-weight: bold; margin: 0;'>$companyName</h1>
+                <p style='font-size: 12px; margin: 3px 0;'>$companyAddress</p>
+                <p style='font-size: 12px; margin: 3px 0;'>$companyPhone</p>
             </div>
             
             <!-- Divider -->
             <div style='border-top: 1px dashed #000; margin: 10px 0;'></div>
             
             <!-- Transaction Info -->
-            <div style='margin-bottom: 10px;'>
-                <div style='display: flex; justify-content: space-between; font-size: 10px;'>
+            <div style='margin-bottom: 12px;'>
+                <div style='display: flex; justify-content: space-between; font-size: 12px;'>
                     <span>Receipt #:</span>
                     <span>{$transaction->transaction_number}</span>
                 </div>
-                <div style='display: flex; justify-content: space-between; font-size: 10px;'>
+                <div style='display: flex; justify-content: space-between; font-size: 12px;'>
                     <span>Date:</span>
                     <span>{$transaction->created_at->format('M d, Y H:i')}</span>
                 </div>
-                <div style='display: flex; justify-content: space-between; font-size: 10px;'>
+                <div style='display: flex; justify-content: space-between; font-size: 12px;'>
                     <span>Cashier:</span>
                     <span>{$transaction->cashier->name}</span>
                 </div>
             </div>
             
             <!-- Customer Info -->
-            <div style='margin-bottom: 10px;'>
-                <div style='font-size: 10px; font-weight: bold; margin-bottom: 5px;'>CUSTOMER:</div>
-                <div style='font-size: 10px;'>$customerName</div>
-                " . ($customerPhone ? "<div style='font-size: 10px;'>$customerPhone</div>" : "") . "
+            <div style='margin-bottom: 12px;'>
+                <div style='font-size: 12px; font-weight: bold; margin-bottom: 6px;'>CUSTOMER:</div>
+                <div style='font-size: 12px;'>$customerName</div>
+                " . ($customerPhone ? "<div style='font-size: 12px;'>$customerPhone</div>" : "") . "
             </div>
             
             <!-- Divider -->
             <div style='border-top: 1px dashed #000; margin: 10px 0;'></div>
             
             <!-- Items -->
-            <div style='margin-bottom: 10px;'>
-                <div style='font-size: 10px; font-weight: bold; margin-bottom: 5px;'>ITEMS:</div>
-                <div style='display: flex; justify-content: space-between; font-size: 10px;'>
+            <div style='margin-bottom: 12px;'>
+                <div style='font-size: 12px; font-weight: bold; margin-bottom: 6px;'>ITEMS:</div>
+                <div style='display: flex; justify-content: space-between; font-size: 12px;'>
                     <span>LPG Gas</span>
                     <span>{$transaction->formatted_quantity}</span>
                 </div>
-                <div style='display: flex; justify-content: space-between; font-size: 10px;'>
+                <div style='display: flex; justify-content: space-between; font-size: 12px;'>
                     <span>@ {$transaction->formatted_price_per_kg}</span>
                     <span></span>
                 </div>
@@ -164,16 +164,16 @@ new #[Layout('components.layouts.app')] class extends Component {
             <div style='border-top: 1px dashed #000; margin: 10px 0;'></div>
             
             <!-- Payment Info -->
-            <div style='margin-bottom: 10px;'>
-                <div style='display: flex; justify-content: space-between; font-size: 10px;'>
+            <div style='margin-bottom: 12px;'>
+                <div style='display: flex; justify-content: space-between; font-size: 12px;'>
                     <span>Payment Method:</span>
                     <span>" . ucfirst($transaction->payment_type) . "</span>
                 </div>
             </div>
             
             <!-- Total -->
-            <div style='margin-bottom: 10px;'>
-                <div style='display: flex; justify-content: space-between; font-size: 12px; font-weight: bold;'>
+            <div style='margin-bottom: 12px;'>
+                <div style='display: flex; justify-content: space-between; font-size: 14px; font-weight: bold;'>
                     <span>TOTAL:</span>
                     <span>{$transaction->formatted_total}</span>
                 </div>
@@ -181,9 +181,9 @@ new #[Layout('components.layouts.app')] class extends Component {
             
             " . ($transaction->notes ? "
             <!-- Notes -->
-            <div style='margin-bottom: 10px;'>
-                <div style='font-size: 10px; font-weight: bold; margin-bottom: 5px;'>NOTES:</div>
-                <div style='font-size: 10px;'>{$transaction->notes}</div>
+            <div style='margin-bottom: 12px;'>
+                <div style='font-size: 12px; font-weight: bold; margin-bottom: 6px;'>NOTES:</div>
+                <div style='font-size: 12px;'>{$transaction->notes}</div>
             </div>
             " : "") . "
             
@@ -191,10 +191,10 @@ new #[Layout('components.layouts.app')] class extends Component {
             <div style='border-top: 1px dashed #000; margin: 10px 0;'></div>
             
             <!-- Footer -->
-            <div style='text-align: center; margin-top: 10px;'>
-                <p style='font-size: 10px; margin: 2px 0;'>Thank you for your purchase!</p>
-                <p style='font-size: 8px; margin: 2px 0;'>Please keep this receipt for your records</p>
-                <p style='font-size: 8px; margin: 2px 0;'>For inquiries: $companyPhone</p>
+            <div style='text-align: center; margin-top: 15px;'>
+                <p style='font-size: 12px; margin: 3px 0;'>Thank you for your purchase!</p>
+                <p style='font-size: 10px; margin: 3px 0;'>Please keep this receipt for your records</p>
+                <p style='font-size: 10px; margin: 3px 0;'>For inquiries: $companyPhone</p>
             </div>
         </div>
         ";
@@ -533,9 +533,9 @@ new #[Layout('components.layouts.app')] class extends Component {
 <head>
     <title>Receipt - ${transactionId}</title>
     <style>
-        @page { size: 80mm auto; margin: 0; }
-        body { margin: 0; padding: 10px; font-family: monospace; background: white; width: 80mm; max-width: 80mm; font-size: 12px; }
-        @media print { body { width: 80mm; max-width: 80mm; } }
+        @page { size: 58mm auto; margin: 0; }
+        body { margin: 0; padding: 10px; font-family: monospace; background: white; width: 58mm; max-width: 58mm; font-size: 12px; }
+        @media print { body { width: 58mm; max-width: 58mm; } }
     </style>
 </head>
 <body>
