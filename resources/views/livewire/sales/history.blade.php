@@ -109,7 +109,7 @@ new #[Layout('components.layouts.app')] class extends Component {
         $logoHtml = $companyLogo ? "<img src='$companyLogo' style='width: 80px; height: 80px; object-fit: contain; margin: 0 auto 15px; display: block;' alt='Company Logo'>" : "";
         
         return "
-        <div style='font-family: monospace; width: 58mm; max-width: 58mm; margin: 0 auto;'>
+        <div style='font-family: monospace; width: 56mm; max-width: 56mm; margin: 0 auto;'>
             <!-- Header -->
             <div style='text-align: center; margin-bottom: 15px;'>
                 $logoHtml
@@ -150,7 +150,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             <!-- Items -->
             <div style='margin-bottom: 12px;'>
                 <div style='font-size: 12px; font-weight: bold; margin-bottom: 6px;'>ITEMS:</div>
-                <div style='display: flex; justify-content: space-between; font-size: 12px;'>
+                <div style='display: flex; justify-content: space-between; font-size: 12px;  font-weight: bold;'>
                     <span>LPG Gas</span>
                     <span>{$transaction->formatted_quantity}</span>
                 </div>
@@ -533,9 +533,9 @@ new #[Layout('components.layouts.app')] class extends Component {
 <head>
     <title>Receipt - ${transactionId}</title>
     <style>
-        @page { size: 58mm auto; margin: 0; }
-        body { margin: 0; padding: 10px; font-family: monospace; background: white; width: 58mm; max-width: 58mm; font-size: 12px; }
-        @media print { body { width: 58mm; max-width: 58mm; } }
+        @page { size: 56mm auto; margin: 0; }
+        body { margin: 0; padding: 10px; font-family: monospace; background: white; width: 56mm; max-width: 56mm; font-size: 12px; }
+        @media print { body { width: 56mm; max-width: 56mm; } }
     </style>
 </head>
 <body>
