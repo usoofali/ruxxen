@@ -56,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
 // TEMPORARY SETUP ROUTE - REMOVE AFTER USE!
 Route::get('/setup-sync', [App\Http\Controllers\SetupController::class, 'setup']);
 Route::get('/test-sync', [App\Http\Controllers\SetupController::class, 'test']);
+Route::get('/clear-cache', [App\Http\Controllers\SetupController::class, 'clearCache']);
 Route::get('/remove-setup', [App\Http\Controllers\SetupController::class, 'remove']);
 
 
