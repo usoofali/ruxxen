@@ -65,7 +65,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Africa/Lagos',
 
     /*
     |--------------------------------------------------------------------------
@@ -98,6 +98,42 @@ return [
     'cipher' => 'AES-256-CBC',
 
     'key' => env('APP_KEY'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Mode
+    |--------------------------------------------------------------------------
+    |
+    | This value determines the mode of the application (master or slave).
+    | Set this in your ".env" file.
+    |
+    */
+
+    'mode' => env('APP_MODE', 'master'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Master URL
+    |--------------------------------------------------------------------------
+    |
+    | This is the URL of the master application for slave synchronization.
+    | Set this in your ".env" file.
+    |
+    */
+
+    'master_url' => env('MASTER_URL', 'https://app.ruxxengas.com'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sync API Key
+    |--------------------------------------------------------------------------
+    |
+    | This key is used for authentication between master and slave.
+    | Set this in your ".env" file.
+    |
+    */
+
+    'sync_api_key' => env('SYNC_API_KEY'),
 
     'previous_keys' => [
         ...array_filter(

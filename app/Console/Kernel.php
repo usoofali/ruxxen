@@ -14,6 +14,21 @@ class Kernel extends ConsoleKernel
     {
         // Clean up old logs and temporary files
         $schedule->command('log:clear')->daily();
+
+        // Sync jobs (only run in slave mode)
+        if (config('app.mode') === 'slave') {
+            // Run sync every 15 minutes
+            $schedule->command('sync:run')
+                ->everyFifteenMinutes()
+                ->withoutOverlapping()
+                ->runInBackground();
+
+            // Run company settings sync once daily (will skip if already synced)
+            $schedule->command('sync:company-settings')
+                ->daily()
+                ->withoutOverlapping()
+                ->runInBackground();
+        }
     }
 
     /**
