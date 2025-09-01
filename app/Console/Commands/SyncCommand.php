@@ -33,6 +33,12 @@ class SyncCommand extends Command
         $this->info('Starting synchronization process...');
 
         try {
+            // Check if sync is enabled
+            if (!config('sync.enabled', true)) {
+                $this->info('Sync is disabled in configuration.');
+                return self::SUCCESS;
+            }
+
             // Check if sync is needed
             if (!$this->option('force') && !$this->syncStatusManager->isSyncNeeded()) {
                 $this->info('No sync needed at this time.');

@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Sync API Routes
 Route::prefix('sync')->group(function () {
+    Route::get('/status', [SyncController::class, 'status'])->name('api.sync.status');
     Route::post('/upload', [SyncController::class, 'upload'])->name('api.sync.upload');
     Route::get('/download', [SyncController::class, 'download'])->name('api.sync.download');
     Route::post('/acknowledge', [SyncController::class, 'acknowledge'])->name('api.sync.acknowledge');
