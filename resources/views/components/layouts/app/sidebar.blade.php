@@ -18,7 +18,7 @@
                     @if(auth()->user()->isCashier())
                         <flux:navlist.item icon="plus-circle" :href="route('sales.create')" :current="request()->routeIs('sales.create')" wire:navigate>{{ __('New Sale') }}</flux:navlist.item>
                         <flux:navlist.item icon="document-text" :href="route('sales.history')" :current="request()->routeIs('sales.history')" wire:navigate>{{ __('Sales History') }}</flux:navlist.item>
-                        <flux:navlist.item icon="arrow-path" :href="route('cashier.sync')" :current="request()->routeIs('cashier.sync')" wire:navigate>{{ __('Sync Monitor') }}</flux:navlist.item>
+        
                     @endif
 
                     @if(auth()->user()->isAdmin())

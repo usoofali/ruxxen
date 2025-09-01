@@ -44,7 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
            // Sync Monitor Route (cashier only)
            Route::middleware(['auth.role:cashier'])->group(function () {
-               Volt::route('cashier/sync', 'sync-monitor')->name('cashier.sync');
+           
            });
 });
 
@@ -56,11 +56,6 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
-// Temporary API routes for testing sync
-Route::prefix('api/sync')->group(function () {
-    Route::post('/upload', [App\Http\Controllers\Api\SyncController::class, 'upload'])->name('api.sync.upload');
-    Route::get('/download', [App\Http\Controllers\Api\SyncController::class, 'download'])->name('api.sync.download');
-    Route::post('/acknowledge', [App\Http\Controllers\Api\SyncController::class, 'acknowledge'])->name('api.sync.acknowledge');
-});
+
 
 require __DIR__.'/auth.php';

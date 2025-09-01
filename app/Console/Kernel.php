@@ -12,6 +12,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // Simple test schedule
+        $schedule->command('sync:status')->everyMinute();
+        
         // Run sync every 5 minutes
         $schedule->command('sync:run')
             ->everyFiveMinutes()

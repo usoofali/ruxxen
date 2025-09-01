@@ -39,7 +39,7 @@ class SyncCommand extends Command
                 return self::SUCCESS;
             }
 
-            $masterUrl = $this->option('master-url') ?? config('app.master_url', 'http://localhost:8000');
+            $masterUrl = $this->option('master-url') ?? config('sync.master_url', 'http://localhost:8000');
             
             if ($this->option('dry-run')) {
                 return $this->performDryRun($masterUrl);
