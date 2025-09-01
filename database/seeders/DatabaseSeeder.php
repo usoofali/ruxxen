@@ -36,14 +36,14 @@ class DatabaseSeeder extends Seeder
         // Initialize inventory
         Inventory::create([
             'current_stock' => 1000.00, // 1000 kg initial stock
-            'minimum_stock' => 100.00,  // Alert when below 100 kg
-            'price_per_kg' => 850.00,   // ₦850 per kg
+            'minimum_stock' => 500.00,  // Alert when below 100 kg
+            'price_per_kg' => 1240.00,   // ₦850 per kg
             'notes' => 'Initial inventory setup for Ruxxen LPG Gas Plant',
         ]);
 
         // Create default company settings
         \App\Models\CompanySetting::create([
-            'company_name' => 'Ruxxen LPG Gas Plant',
+            'company_name' => 'Ruxxen Investment Limited',
             'company_address' => '123 Gas Plant Street, Lagos, Nigeria',
             'company_phone' => '+234 123 456 7890',
             'company_email' => 'info@ruxxenlpg.com',

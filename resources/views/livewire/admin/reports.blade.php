@@ -73,21 +73,22 @@ new #[Layout('components.layouts.app')] class extends Component {
     public function getSalesDataProperty()
     {
         $transactions = $this->transactions;
+        $completedTransactions = $transactions->where('status', 'completed');
         
         return [
-            'total_sales' => $transactions->sum('total_amount'),
-            'total_quantity' => $transactions->sum('quantity_kg'),
+            'total_sales' => $completedTransactions->sum('total_amount'),
+            'total_quantity' => $completedTransactions->sum('quantity_kg'),
             'total_transactions' => $transactions->count(),
-            'average_transaction' => $transactions->count() > 0 ? $transactions->sum('total_amount') / $transactions->count() : 0,
+            'average_transaction' => $completedTransactions->count() > 0 ? $completedTransactions->sum('total_amount') / $completedTransactions->count() : 0,
             'completed_transactions' => $transactions->where('status', 'completed')->count(),
             'cancelled_transactions' => $transactions->where('status', 'cancelled')->count(),
             'refunded_transactions' => $transactions->where('status', 'refunded')->count(),
-            'cash_payments' => $transactions->where('payment_type', 'cash')->count(),
-            'card_payments' => $transactions->where('payment_type', 'card')->count(),
-            'transfer_payments' => $transactions->where('payment_type', 'transfer')->count(),
-            'cash_amount' => $transactions->where('payment_type', 'cash')->sum('total_amount'),
-            'card_amount' => $transactions->where('payment_type', 'card')->sum('total_amount'),
-            'transfer_amount' => $transactions->where('payment_type', 'transfer')->sum('total_amount'),
+            'cash_payments' => $completedTransactions->where('payment_type', 'cash')->count(),
+            'card_payments' => $completedTransactions->where('payment_type', 'card')->count(),
+            'transfer_payments' => $completedTransactions->where('payment_type', 'transfer')->count(),
+            'cash_amount' => $completedTransactions->where('payment_type', 'cash')->sum('total_amount'),
+            'card_amount' => $completedTransactions->where('payment_type', 'card')->sum('total_amount'),
+            'transfer_amount' => $completedTransactions->where('payment_type', 'transfer')->sum('total_amount'),
         ];
     }
 
@@ -104,10 +105,12 @@ new #[Layout('components.layouts.app')] class extends Component {
                 return $transaction->created_at->format('Y-m-d') === $date->format('Y-m-d');
             });
 
+            $completedDayTransactions = $dayTransactions->where('status', 'completed');
+
             $dailyData[] = [
                 'date' => $date->format('M d'),
-                'sales' => $dayTransactions->sum('total_amount'),
-                'quantity' => $dayTransactions->sum('quantity_kg'),
+                'sales' => $completedDayTransactions->sum('total_amount'),
+                'quantity' => $completedDayTransactions->sum('quantity_kg'),
                 'transactions' => $dayTransactions->count(),
             ];
         }
@@ -124,14 +127,15 @@ new #[Layout('components.layouts.app')] class extends Component {
 
         foreach ($cashiers as $cashier) {
             $cashierTransactions = $transactions->where('cashier_id', $cashier->id);
+            $completedCashierTransactions = $cashierTransactions->where('status', 'completed');
             
             $cashierData[] = [
                 'name' => $cashier->name,
                 'email' => $cashier->email,
-                'total_sales' => $cashierTransactions->sum('total_amount'),
-                'total_quantity' => $cashierTransactions->sum('quantity_kg'),
+                'total_sales' => $completedCashierTransactions->sum('total_amount'),
+                'total_quantity' => $completedCashierTransactions->sum('quantity_kg'),
                 'transactions' => $cashierTransactions->count(),
-                'average_transaction' => $cashierTransactions->count() > 0 ? $cashierTransactions->sum('total_amount') / $cashierTransactions->count() : 0,
+                'average_transaction' => $completedCashierTransactions->count() > 0 ? $completedCashierTransactions->sum('total_amount') / $completedCashierTransactions->count() : 0,
             ];
         }
 

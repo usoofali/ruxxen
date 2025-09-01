@@ -2,6 +2,9 @@
 
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Inventory;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\WithPagination;
 use Livewire\Volt\Component;
@@ -83,12 +86,12 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     public function getTotalSalesProperty()
     {
-        return $this->transactions->sum('total_amount');
+        return $this->transactions->where('status', 'completed')->sum('total_amount');
     }
 
     public function getTotalQuantityProperty()
     {
-        return $this->transactions->sum('quantity_kg');
+        return $this->transactions->where('status', 'completed')->sum('quantity_kg');
     }
 
     public function getCashiersProperty()
@@ -111,8 +114,44 @@ new #[Layout('components.layouts.app')] class extends Component {
     public function updateTransactionStatus($transactionId, $status)
     {
         $transaction = Transaction::find($transactionId);
-        if ($transaction) {
+        if (!$transaction) {
+            return;
+        }
+
+        // Only allow status changes for completed transactions
+        if ($transaction->status !== 'completed') {
+            return;
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $inventory = Inventory::first();
+            $previousStatus = $transaction->status;
+
+            // Update transaction status
             $transaction->update(['status' => $status]);
+
+            // Handle inventory restoration for cancelled/refunded transactions
+            if (in_array($status, ['cancelled', 'refunded'])) {
+                // Add the sold quantity back to inventory
+                $inventory->addStock(
+                    $transaction->quantity_kg,
+                    ucfirst($status) . ' transaction: ' . $transaction->transaction_number,
+                    Auth::user(),
+                    "Transaction {$status} by admin. Previous status: {$previousStatus}"
+                );
+            }
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            logger()->error('Failed to update transaction status', [
+                'transaction_id' => $transactionId,
+                'new_status' => $status,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 

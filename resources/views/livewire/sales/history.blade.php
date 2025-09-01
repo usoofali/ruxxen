@@ -68,12 +68,12 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     public function getTotalSalesProperty()
     {
-        return $this->transactions->sum('total_amount');
+        return $this->transactions->where('status', 'completed')->sum('total_amount');
     }
 
     public function getTotalQuantityProperty()
     {
-        return $this->transactions->sum('quantity_kg');
+        return $this->transactions->where('status', 'completed')->sum('quantity_kg');
     }
 
     public $showReceipt = false;
