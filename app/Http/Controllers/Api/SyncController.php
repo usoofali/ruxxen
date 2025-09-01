@@ -12,6 +12,7 @@ use App\Models\SyncLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class SyncController extends Controller
@@ -21,6 +22,15 @@ class SyncController extends Controller
      */
     public function push(Request $request): JsonResponse
     {
+        Log::info('SyncController@push: Request received', [
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'headers' => $request->headers->all(),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'timestamp' => now()->toISOString()
+        ]);
+
         $validator = Validator::make($request->all(), [
             'table' => 'required|string|in:inventory,transactions,company_settings,users,inventory_adjustments',
             'data' => 'required|array',
@@ -35,6 +45,12 @@ class SyncController extends Controller
 
         $table = $request->input('table');
         $data = $request->input('data');
+
+        Log::info('SyncController@push: Processing request', [
+            'table' => $table,
+            'data_count' => count($data),
+            'request_data_sample' => array_slice($data, 0, 2) // Log first 2 records as sample
+        ]);
 
         try {
             DB::beginTransaction();
@@ -62,6 +78,12 @@ class SyncController extends Controller
 
             DB::commit();
 
+            Log::info('SyncController@push: Successfully completed', [
+                'table' => $table,
+                'synced_count' => count($data),
+                'sync_log_updated' => true
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => "Successfully synced {$table} data",
@@ -70,6 +92,14 @@ class SyncController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            Log::error('SyncController@push: Exception occurred', [
+                'table' => $table,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             
             return response()->json([
                 'error' => 'Sync failed',
@@ -83,6 +113,16 @@ class SyncController extends Controller
      */
     public function pull(Request $request): JsonResponse
     {
+        Log::info('SyncController@pull: Request received', [
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'headers' => $request->headers->all(),
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'query_params' => $request->query(),
+            'timestamp' => now()->toISOString()
+        ]);
+
         $validator = Validator::make($request->all(), [
             'table' => 'required|string|in:inventory,transactions,company_settings,users,inventory_adjustments',
             'since' => 'nullable|date',
@@ -98,8 +138,21 @@ class SyncController extends Controller
         $table = $request->input('table');
         $since = $request->input('since');
 
+        Log::info('SyncController@pull: Processing request', [
+            'table' => $table,
+            'since' => $since,
+            'since_parsed' => $since ? now()->parse($since)->toISOString() : 'null'
+        ]);
+
         try {
             $data = $this->getDataSince($table, $since);
+
+            Log::info('SyncController@pull: Successfully retrieved data', [
+                'table' => $table,
+                'data_count' => count($data),
+                'since' => $since,
+                'response_size' => strlen(json_encode($data))
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -110,6 +163,15 @@ class SyncController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('SyncController@pull: Exception occurred', [
+                'table' => $table,
+                'since' => $since,
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'error' => 'Pull failed',
                 'message' => $e->getMessage()
@@ -122,6 +184,14 @@ class SyncController extends Controller
      */
     private function syncInventory(array $data): void
     {
+        Log::info('SyncController: Starting inventory sync', [
+            'total_items' => count($data),
+            'first_item_id' => $data[0]['id'] ?? 'N/A'
+        ]);
+
+        $created = 0;
+        $updated = 0;
+
         foreach ($data as $item) {
             $inventory = Inventory::find($item['id']);
             
@@ -134,6 +204,7 @@ class SyncController extends Controller
                     'notes' => $item['notes'] ?? null,
                     'updated_at' => $item['updated_at']
                 ]);
+                $updated++;
             } else {
                 // Create new record
                 Inventory::create([
@@ -145,8 +216,15 @@ class SyncController extends Controller
                     'created_at' => $item['created_at'],
                     'updated_at' => $item['updated_at']
                 ]);
+                $created++;
             }
         }
+
+        Log::info('SyncController: Completed inventory sync', [
+            'total_items' => count($data),
+            'created' => $created,
+            'updated' => $updated
+        ]);
     }
 
     /**
@@ -154,6 +232,14 @@ class SyncController extends Controller
      */
     private function syncTransactions(array $data): void
     {
+        Log::info('SyncController: Starting transactions sync', [
+            'total_items' => count($data),
+            'first_item_id' => $data[0]['id'] ?? 'N/A'
+        ]);
+
+        $created = 0;
+        $updated = 0;
+
         foreach ($data as $item) {
             $transaction = Transaction::find($item['id']);
             
@@ -171,6 +257,7 @@ class SyncController extends Controller
                     'status' => $item['status'],
                     'updated_at' => $item['updated_at']
                 ]);
+                $updated++;
             } else {
                 // Create new record
                 Transaction::create([
@@ -187,8 +274,15 @@ class SyncController extends Controller
                     'created_at' => $item['created_at'],
                     'updated_at' => $item['updated_at']
                 ]);
+                $created++;
             }
         }
+
+        Log::info('SyncController: Completed transactions sync', [
+            'total_items' => count($data),
+            'created' => $created,
+            'updated' => $updated
+        ]);
     }
 
     /**
@@ -196,6 +290,14 @@ class SyncController extends Controller
      */
     private function syncCompanySettings(array $data): void
     {
+        Log::info('SyncController: Starting company settings sync', [
+            'total_items' => count($data),
+            'first_item_id' => $data[0]['id'] ?? 'N/A'
+        ]);
+
+        $created = 0;
+        $updated = 0;
+
         foreach ($data as $item) {
             $setting = CompanySetting::find($item['id']);
             
@@ -214,6 +316,7 @@ class SyncController extends Controller
                     'smtp_encryption' => $item['smtp_encryption'] ?? 'tls',
                     'updated_at' => $item['updated_at']
                 ]);
+                $updated++;
             } else {
                 // Create new record
                 CompanySetting::create([
@@ -231,8 +334,15 @@ class SyncController extends Controller
                     'created_at' => $item['created_at'],
                     'updated_at' => $item['updated_at']
                 ]);
+                $created++;
             }
         }
+
+        Log::info('SyncController: Completed company settings sync', [
+            'total_items' => count($data),
+            'created' => $created,
+            'updated' => $updated
+        ]);
     }
 
     /**
@@ -240,6 +350,14 @@ class SyncController extends Controller
      */
     private function syncUsers(array $data): void
     {
+        Log::info('SyncController: Starting users sync', [
+            'total_items' => count($data),
+            'first_item_id' => $data[0]['id'] ?? 'N/A'
+        ]);
+
+        $created = 0;
+        $updated = 0;
+
         foreach ($data as $item) {
             $user = \App\Models\User::find($item['id']);
             
@@ -254,6 +372,7 @@ class SyncController extends Controller
                     'is_active' => $item['is_active'],
                     'updated_at' => $item['updated_at']
                 ]);
+                $updated++;
             } else {
                 // Create new record
                 \App\Models\User::create([
@@ -267,8 +386,15 @@ class SyncController extends Controller
                     'created_at' => $item['created_at'],
                     'updated_at' => $item['updated_at']
                 ]);
+                $created++;
             }
         }
+
+        Log::info('SyncController: Completed users sync', [
+            'total_items' => count($data),
+            'created' => $created,
+            'updated' => $updated
+        ]);
     }
 
     /**
@@ -276,6 +402,14 @@ class SyncController extends Controller
      */
     private function syncInventoryAdjustments(array $data): void
     {
+        Log::info('SyncController: Starting inventory adjustments sync', [
+            'total_items' => count($data),
+            'first_item_id' => $data[0]['id'] ?? 'N/A'
+        ]);
+
+        $created = 0;
+        $updated = 0;
+
         foreach ($data as $item) {
             $adjustment = \App\Models\InventoryAdjustment::find($item['id']);
             
@@ -291,6 +425,7 @@ class SyncController extends Controller
                     'notes' => $item['notes'] ?? null,
                     'updated_at' => $item['updated_at']
                 ]);
+                $updated++;
             } else {
                 // Create new record
                 \App\Models\InventoryAdjustment::create([
@@ -305,8 +440,15 @@ class SyncController extends Controller
                     'created_at' => $item['created_at'],
                     'updated_at' => $item['updated_at']
                 ]);
+                $created++;
             }
         }
+
+        Log::info('SyncController: Completed inventory adjustments sync', [
+            'total_items' => count($data),
+            'created' => $created,
+            'updated' => $updated
+        ]);
     }
 
     /**
@@ -314,6 +456,12 @@ class SyncController extends Controller
      */
     private function getDataSince(string $table, ?string $since): array
     {
+        Log::info('SyncController: getDataSince called', [
+            'table' => $table,
+            'since' => $since,
+            'since_parsed' => $since ? now()->parse($since)->toISOString() : 'null'
+        ]);
+
         $query = match ($table) {
             'inventory' => Inventory::query(),
             'transactions' => Transaction::query(),
@@ -327,6 +475,16 @@ class SyncController extends Controller
             $query->where('updated_at', '>=', $since);
         }
 
-        return $query->get()->toArray();
+        $result = $query->get()->toArray();
+
+        Log::info('SyncController: getDataSince completed', [
+            'table' => $table,
+            'since' => $since,
+            'result_count' => count($result),
+            'query_sql' => $query->toSql(),
+            'query_bindings' => $query->getBindings()
+        ]);
+
+        return $result;
     }
 }
