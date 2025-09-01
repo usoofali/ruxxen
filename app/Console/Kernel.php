@@ -12,18 +12,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Simple test schedule
-        $schedule->command('sync:status')->everyMinute();
-        
-        // Run sync every 5 minutes
-        $schedule->command('sync:run')
-            ->everyFiveMinutes()
-            ->withoutOverlapping()
-            ->runInBackground()
-            ->onFailure(function () {
-                \Log::error('Scheduled sync failed');
-            });
-
         // Clean up old logs and temporary files
         $schedule->command('log:clear')->daily();
     }
