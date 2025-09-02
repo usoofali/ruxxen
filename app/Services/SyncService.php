@@ -22,11 +22,7 @@ class SyncService
     public function __construct()
     {
         $this->masterUrl = config('app.master_url', 'https://app.ruxxengas.com');
-        $this->apiKey = config('app.sync_api_key', '');
-        
-        if (empty($this->apiKey)) {
-            throw new \InvalidArgumentException('SYNC_API_KEY environment variable is not configured');
-        }
+        $this->apiKey = config('app.sync_api_key');
         
         $this->httpClient = Http::withHeaders([
             'X-Sync-API-Key' => $this->apiKey,

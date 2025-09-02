@@ -31,13 +31,6 @@ class SyncRun extends Command
             return self::FAILURE;
         }
 
-        // Check if sync API key is configured
-        if (empty(config('app.sync_api_key'))) {
-            $this->error('SYNC_API_KEY environment variable is not configured. Please add it to your .env file.');
-            $this->info('Example: SYNC_API_KEY=your-secret-api-key-here');
-            return self::FAILURE;
-        }
-
         $this->info('Starting synchronization...');
 
         // Check if recovery is needed
