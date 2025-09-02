@@ -22,14 +22,8 @@ class SyncService
     public function __construct()
     {
         $this->masterUrl = config('app.master_url', 'https://app.ruxxengas.com');
-        $this->apiKey = config('app.sync_api_key', 'your-secret-api-key-here');
-        Log::info('SyncService initialized', [
-            'master_url' => $this->masterUrl,
-            'api_key_length' => strlen($this->apiKey),
-            'api_key_preview' => substr($this->apiKey, 0, 8) . '...',
-            'app_mode' => config('app.mode'),
-            'sync_api_key_config' => config('app.sync_api_key') ? 'SET' : 'NOT SET'
-        ]);
+        $this->apiKey = config('app.sync_api_key', '');
+        
         if (empty($this->apiKey)) {
             throw new \InvalidArgumentException('SYNC_API_KEY environment variable is not configured');
         }
