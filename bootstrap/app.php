@@ -13,7 +13,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'auth.role' => \App\Http\Middleware\CheckRole::class,
-            'sync.authorized' => \App\Http\Middleware\EnsureSyncAuthorized::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
