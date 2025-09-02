@@ -34,6 +34,10 @@ class SyncService
     public function __construct()
     {
         $this->syncDataPath = storage_path('app/sync_data');
+        
+        // Use configuration values if available
+        $this->syncTimeout = config('app.sync_timeout', $this->syncTimeout);
+        
         $this->ensureSyncDirectoryExists();
         $this->initializeDatabaseConnection();
         $this->log('info', "SyncService initialized");
@@ -44,6 +48,11 @@ class SyncService
      */
     protected function log(string $level, string $message, array $context = []): void
     {
+        // Check if sync logging is enabled
+        if (!config('app.sync_logging_enabled', true)) {
+            return;
+        }
+
         // Check if daily channel exists, otherwise use default
         try {
             // Ensure the daily channel is available

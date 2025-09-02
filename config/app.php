@@ -132,4 +132,18 @@ return [
     |
     */
 
+    'mode' => env('APP_MODE', 'master'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sync Settings
+    |--------------------------------------------------------------------------
+    |
+    | Additional configuration for sync behavior
+    |
+    */
+
+    'sync_logging_enabled' => env('SYNC_LOGGING_ENABLED', true),
+    'sync_timeout' => env('SYNC_TIMEOUT', 25),
+    'sync_retry_attempts' => env('SYNC_RETRY_ATTEMPTS', 3),
 ];
