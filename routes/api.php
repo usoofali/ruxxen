@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\SyncController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,4 +17,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Sync API Routes
+Route::prefix('sync')->group(function () {
+    Route::get('/status', [SyncController::class, 'status'])->name('api.sync.status');
+    Route::post('/upload', [SyncController::class, 'upload'])->name('api.sync.upload');
+    Route::get('/download', [SyncController::class, 'download'])->name('api.sync.download');
+    Route::post('/acknowledge', [SyncController::class, 'acknowledge'])->name('api.sync.acknowledge');
 });

@@ -42,7 +42,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
                Volt::route('settings/company/view', 'settings.company-view')->name('settings.company.view');
            });
 
-
+           // Sync Monitor Route (cashier only)
+           Route::middleware(['auth.role:cashier'])->group(function () {
+           
+           });
 });
 
 Route::middleware(['auth'])->group(function () {
