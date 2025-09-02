@@ -51,9 +51,6 @@ class SetupController extends Controller
             // 5. Check database tables
             $results['database_tables'] = [];
             try {
-                // First check if we can connect to the database
-                DB::connection()->getPdo();
-                
                 $tables = ['sync_logs', 'inventory', 'transactions', 'company_settings', 'users', 'inventory_adjustments'];
                 foreach ($tables as $table) {
                     try {
@@ -65,7 +62,6 @@ class SetupController extends Controller
                 }
             } catch (\Exception $e) {
                 $results['database_tables']['error'] = "❌ DB ERROR: " . $e->getMessage();
-                $results['database_tables']['connection'] = "❌ CANNOT CONNECT: " . $e->getMessage();
             }
             
             // 6. Check routes
@@ -86,8 +82,6 @@ class SetupController extends Controller
                 $results['routes']['total_sync_routes'] = count($syncRoutes);
             } catch (\Exception $e) {
                 $results['routes']['error'] = "❌ ROUTE ERROR: " . $e->getMessage();
-                $results['routes']['sync_routes'] = [];
-                $results['routes']['total_sync_routes'] = 0;
             }
             
             // 7. Check configuration
@@ -100,9 +94,9 @@ class SetupController extends Controller
             
             // 8. Check cache status
             $results['cache_status'] = [
-                'config_cache' => File::exists(base_path('bootstrap/cache/config.php')) ? 'EXISTS' : 'CLEARED',
-                'route_cache' => File::exists(base_path('bootstrap/cache/routes.php')) ? 'EXISTS' : 'CLEARED',
-                'view_cache' => File::exists(base_path('bootstrap/cache/views.php')) ? 'EXISTS' : 'CLEARED'
+                'config_cache' => File::exists(bootstrap_path('cache/config.php')) ? 'EXISTS' : 'CLEARED',
+                'route_cache' => File::exists(bootstrap_path('cache/routes.php')) ? 'EXISTS' : 'CLEARED',
+                'view_cache' => File::exists(bootstrap_path('cache/views.php')) ? 'EXISTS' : 'CLEARED'
             ];
             
             // 9. Check middleware registration
@@ -113,8 +107,6 @@ class SetupController extends Controller
                 $results['middleware']['total_middleware'] = count($middleware);
             } catch (\Exception $e) {
                 $results['middleware']['error'] = "❌ MIDDLEWARE ERROR: " . $e->getMessage();
-                $results['middleware']['sync_authorized'] = '❌ ERROR';
-                $results['middleware']['total_middleware'] = 0;
             }
             
             // 10. Check if sync commands exist
@@ -126,9 +118,6 @@ class SetupController extends Controller
                 $results['commands']['total_commands'] = count($commands);
             } catch (\Exception $e) {
                 $results['commands']['error'] = "❌ COMMAND ERROR: " . $e->getMessage();
-                $results['commands']['sync_run'] = '❌ ERROR';
-                $results['commands']['sync_company_settings'] = '❌ ERROR';
-                $results['commands']['total_commands'] = 0;
             }
             
             $results['status'] = 'success';
@@ -215,61 +204,6 @@ class SetupController extends Controller
         }
         
         return view('setup.sync-test', compact('results'));
-    }
-    
-    public function clearCache()
-    {
-        try {
-            $results = [];
-            
-            // Clear config cache
-            try {
-                if (File::exists(base_path('bootstrap/cache/config.php'))) {
-                    File::delete(base_path('bootstrap/cache/config.php'));
-                    $results['config_cache'] = '✅ CLEARED';
-                } else {
-                    $results['config_cache'] = '✅ ALREADY CLEARED';
-                }
-            } catch (\Exception $e) {
-                $results['config_cache'] = '❌ ERROR: ' . $e->getMessage();
-            }
-            
-            // Clear route cache
-            try {
-                if (File::exists(base_path('bootstrap/cache/routes.php'))) {
-                    File::delete(base_path('bootstrap/cache/routes.php'));
-                    $results['route_cache'] = '✅ CLEARED';
-                } else {
-                    $results['route_cache'] = '✅ ALREADY CLEARED';
-                }
-            } catch (\Exception $e) {
-                $results['route_cache'] = '❌ ERROR: ' . $e->getMessage();
-            }
-            
-            // Clear view cache
-            try {
-                if (File::exists(base_path('bootstrap/cache/views.php'))) {
-                    File::delete(base_path('bootstrap/cache/views.php'));
-                    $results['view_cache'] = '✅ CLEARED';
-                } else {
-                    $results['view_cache'] = '✅ ALREADY CLEARED';
-                }
-            } catch (\Exception $e) {
-                $results['view_cache'] = '❌ ERROR: ' . $e->getMessage();
-            }
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Cache cleared successfully',
-                'results' => $results
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to clear cache: ' . $e->getMessage()
-            ], 500);
-        }
     }
     
     public function remove()

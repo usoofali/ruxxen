@@ -23,10 +23,6 @@
                     <a href="/test-sync" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
                         🧪 Test API Endpoints
                     </a>
-                    <a href="/clear-cache" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg" 
-                       onclick="return confirm('Are you sure you want to clear all caches?')">
-                        🗂️ Clear Caches
-                    </a>
                     <a href="/remove-setup" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg" 
                        onclick="return confirm('Are you sure you want to remove the setup routes?')">
                         🗑️ Remove Setup Routes
