@@ -18,7 +18,7 @@ class SyncSchedulerCommand extends Command
         
         try {
             // Check if sync is enabled
-            if (!config('sync.enabled', true)) {
+            if (!config('app.sync_enabled', true)) {
                 $this->info('Sync is disabled in configuration.');
                 return self::SUCCESS;
             }

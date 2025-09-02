@@ -272,33 +272,4 @@ class SyncController extends Controller
 
         return $query->get()->toArray();
     }
-
-    /**
-     * Get sync status for Master server
-     */
-    public function status(): JsonResponse
-    {
-        try {
-            $status = $this->syncStatusManager->getStatus();
-            
-            return response()->json([
-                'success' => true,
-                'status' => $status['status'],
-                'last_synced_at' => $status['last_synced_at'],
-                'pending_records' => $status['pending_records'],
-                'retry_count' => $status['retry_count'],
-                'last_error' => $status['last_error'],
-                'created_at' => $status['created_at'],
-                'updated_at' => $status['updated_at'],
-                'server_type' => 'master'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Failed to get sync status', ['error' => $e->getMessage()]);
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to get status: ' . $e->getMessage()
-            ], 500);
-        }
-    }
 }
