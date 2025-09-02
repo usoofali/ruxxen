@@ -53,10 +53,6 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
-// TEMPORARY SETUP ROUTE - REMOVE AFTER USE!
-Route::get('/setup-sync', [App\Http\Controllers\SetupController::class, 'setup']);
-Route::get('/test-sync', [App\Http\Controllers\SetupController::class, 'test']);
-Route::get('/remove-setup', [App\Http\Controllers\SetupController::class, 'remove']);
 
 
 require __DIR__.'/auth.php';
