@@ -25,3 +25,5 @@ Route::prefix('sync')->group(function () {
     Route::get('/download', [SyncController::class, 'download'])->name('api.sync.download');
     Route::post('/acknowledge', [SyncController::class, 'acknowledge'])->name('api.sync.acknowledge');
 });
+
+// Homepage API Route
