@@ -19,11 +19,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Sync API Routes
+// Sync API routes
 Route::prefix('sync')->group(function () {
-    Route::post('/upload', [SyncController::class, 'upload'])->name('api.sync.upload');
-    Route::get('/download', [SyncController::class, 'download'])->name('api.sync.download');
-    Route::post('/acknowledge', [SyncController::class, 'acknowledge'])->name('api.sync.acknowledge');
+    Route::get('tables', [SyncController::class, 'tables']);
+    Route::get('status', [SyncController::class, 'status']);
+    Route::get('status/{tableName}', [SyncController::class, 'tableStatus']);
+    Route::get('pull/{tableName}', [SyncController::class, 'pull']);
+    Route::post('push/{tableName}', [SyncController::class, 'push']);
+    Route::post('reset/{tableName?}', [SyncController::class, 'reset']);
+    Route::post('full', [SyncController::class, 'fullSync']);
+    
+    // Additional sync methods for compatibility
+    Route::post('upload', [SyncController::class, 'upload']);
+    Route::get('download', [SyncController::class, 'download']);
+    Route::post('acknowledge', [SyncController::class, 'acknowledge']);
 });
-
-// Homepage API Route

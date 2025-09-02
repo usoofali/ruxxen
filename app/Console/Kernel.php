@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Services\SyncService;
 
 class Kernel extends ConsoleKernel
 {
@@ -12,14 +13,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Run sync every 5 minutes
-        $schedule->command('sync:run')
-            ->everyFiveMinutes()
-            ->withoutOverlapping()
-            ->runInBackground()
-            ->onFailure(function () {
-                \Log::error('Scheduled sync failed');
-            });
+        // Sync every 15 minutes (adjust as needed)
+        $schedule->call(function () {
+            $syncService = app(SyncService::class);
+            $result = $syncService->sync();
+            
+            // Log results
+            \Log::info('Scheduled sync completed', [
+                'pull_success' => $result['pull']['success'],
+                'push_success' => $result['push']['success']
+            ]);
+        })->everyFifteenMinutes();
 
         // Clean up old logs and temporary files
         $schedule->command('log:clear')->daily();

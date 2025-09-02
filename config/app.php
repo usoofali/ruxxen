@@ -132,8 +132,4 @@ return [
     |
     */
 
-    'master_url' => env('MASTER_URL', 'http://localhost:8000'),
-    'sync_enabled' => env('SYNC_ENABLED', true),
-    'sync_interval' => env('SYNC_INTERVAL', 5), // minutes
-
 ];
