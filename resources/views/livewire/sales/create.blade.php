@@ -419,7 +419,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     <title>Receipt - ${transactionId}</title>
     <style>
         @page { size: 56mm auto; margin: 0; }
-        body { margin: 0; padding: 10px; font-family: monospace; background: white; width: 56mm; max-width: 56mm; font-size: 12px; }
+        body { margin: 2px; padding: 10px; font-family: monospace; background: white; width: 56mm; max-width: 56mm; font-size: 12px; }
         @media print { body { width: 56mm; max-width: 56mm; } }
     </style>
 </head>

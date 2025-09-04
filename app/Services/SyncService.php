@@ -268,7 +268,7 @@ class SyncService
                 }
             });
 
-            $this->updateLastSyncTime($tableName);
+            // $this->updateLastSyncTime($tableName);
             
             return [
                 'success' => true,
