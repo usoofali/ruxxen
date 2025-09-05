@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
         // Create default company settings
         \App\Models\CompanySetting::create([
             'company_name' => 'Ruxxen Investment Limited',
-            'company_address' => '123 Gas Plant Street, Lagos, Nigeria',
+            'company_address' => 'Along Bye Pass Zaria Road, Lalan Gusau, Zamfara State, Nigeria',
             'company_phone' => '+234 123 456 7890',
             'company_email' => 'info@ruxxenlpg.com',
             'smtp_host' => 'smtp.mailtrap.io',

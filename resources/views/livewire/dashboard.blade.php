@@ -3,6 +3,8 @@
 use App\Models\Inventory;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Support\Facades\File;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -13,6 +15,9 @@ new #[Layout('components.layouts.app')] class extends Component {
     public $monthlySales;
     public $totalCashiers;
     public $recentTransactions;
+    public int $unsyncedTransactions = 0;
+    public ?string $lastSyncAt = null;
+    public bool $isOnline = false;
 
     public function mount()
     {
@@ -23,6 +28,8 @@ new #[Layout('components.layouts.app')] class extends Component {
         } else {
             $this->loadCashierData();
         }
+
+        $this->checkConnectivity();
     }
 
     private function loadAdminData()
@@ -50,6 +57,58 @@ new #[Layout('components.layouts.app')] class extends Component {
             ->latest()
             ->take(5)
             ->get();
+
+        // Compute unsynced transactions only on slave mode
+        if (config('app.mode') === 'slave') {
+            $this->computeUnsyncedTransactions();
+        }
+    }
+
+    private function computeUnsyncedTransactions(): void
+    {
+        $filePath = storage_path('app/sync_data/transactions_last_sync.dat');
+        $fallback = '1970-01-01 00:00:00';
+
+        $lastSync = $fallback;
+        if (File::exists($filePath)) {
+            $content = trim((string) File::get($filePath));
+            $lastSync = $content !== '' ? $content : $fallback;
+        }
+
+        try {
+            $parsed = Carbon::parse($lastSync);
+            $this->lastSyncAt = $parsed->toDateTimeString();
+        } catch (\Throwable $e) {
+            $this->lastSyncAt = $fallback;
+        }
+
+        $this->unsyncedTransactions = Transaction::where(function ($q) {
+            $q->where('updated_at', '>', $this->lastSyncAt)
+              ->orWhere('created_at', '>', $this->lastSyncAt);
+        })->count();
+    }
+
+    public function checkConnectivity(): void
+    {
+        $hosts = [
+            'www.google.com',
+            'www.cloudflare.com',
+            'www.amazon.com',
+        ];
+
+        $this->isOnline = false;
+        foreach ($hosts as $host) {
+            try {
+                $conn = @fsockopen($host, 80, $errno, $errstr, 1);
+                if ($conn) {
+                    fclose($conn);
+                    $this->isOnline = true;
+                    break;
+                }
+            } catch (\Throwable $e) {
+                // ignore and try next
+            }
+        }
     }
 }; ?>
 
@@ -144,6 +203,42 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </div>
             </div>
         </div>
+        @if(Auth::user()->isCashier() && config('app.mode') === 'slave')
+        <!-- Unsynced Transactions -->
+        <div class="rounded-xl border border-amber-300 bg-white p-6 dark:border-amber-600 dark:bg-gray-800">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900">
+                        <svg class="h-5 w-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 4h.01M5.07 19h13.86A2 2 0 0021 17.07L13.93 3.64a2 2 0 00-3.86 0L3 17.07A2 2 0 005.07 19z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-amber-700 dark:text-amber-300">Unsynced Transactions</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($unsyncedTransactions) }}</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Since: {{ $lastSyncAt }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Connectivity Status -->
+        <div wire:poll.15s="checkConnectivity" class="rounded-xl border {{ $isOnline ? 'border-green-300' : 'border-red-300' }} bg-white p-6 dark:bg-gray-800 {{ $isOnline ? 'dark:border-green-700' : 'dark:border-red-700' }}">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="flex h-8 w-8 items-center justify-center rounded-lg {{ $isOnline ? 'bg-green-100 dark:bg-green-900' : 'bg-red-100 dark:bg-red-900' }}">
+                        <svg class="h-5 w-5 {{ $isOnline ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 17a3.5 3.5 0 016.999.001M6 13a7 7 0 0112 0M3.5 9a10.5 10.5 0 0117 0" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Internet Connection</p>
+                    <p class="text-2xl font-bold {{ $isOnline ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400' }}">{{ $isOnline ? 'Online' : 'Offline' }}</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Checked on page load</p>
+                </div>
+            </div>
+        </div>
+        @endif
         @endif
     </div>
 
