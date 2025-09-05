@@ -35,6 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
            // Admin-only Settings Routes
            Route::middleware(['auth.role:admin'])->group(function () {
                Volt::route('settings/company', 'settings.company')->name('settings.company');
+               Volt::route('settings/data-manager', 'settings.data-manager')->name('settings.data-manager');
            });
 
            // Company Settings View Route (for all authenticated users)

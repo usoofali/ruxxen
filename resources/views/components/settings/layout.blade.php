@@ -5,6 +5,11 @@
             <flux:navlist.item :href="route('settings.password')" wire:navigate>{{ __('Password') }}</flux:navlist.item>
             <flux:navlist.item :href="route('settings.appearance')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
             <flux:navlist.item :href="route('settings.company')" wire:navigate>{{ __('Company Settings') }}</flux:navlist.item>
+            @auth
+                @if(auth()->user()->isAdmin())
+                    <flux:navlist.item :href="route('settings.data-manager')" wire:navigate>{{ __('Data Manager') }}</flux:navlist.item>
+                @endif
+            @endauth
         </flux:navlist>
     </div>
 
