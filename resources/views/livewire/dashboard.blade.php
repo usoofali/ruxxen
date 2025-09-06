@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Inventory;
+use App\Models\SyncLog;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
@@ -66,26 +67,61 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     private function computeUnsyncedTransactions(): void
     {
-        $filePath = storage_path('app/sync_data/transactions_last_sync.dat');
-        $fallback = '1970-01-01 00:00:00';
-
-        $lastSync = $fallback;
-        if (File::exists($filePath)) {
-            $content = trim((string) File::get($filePath));
-            $lastSync = $content !== '' ? $content : $fallback;
-        }
-
         try {
-            $parsed = Carbon::parse($lastSync);
-            $this->lastSyncAt = $parsed->toDateTimeString();
-        } catch (\Throwable $e) {
-            $this->lastSyncAt = $fallback;
-        }
+            // Count transactions with pending or failed sync logs
+            $this->unsyncedTransactions = SyncLog::whereIn('sync_status', ['pending', 'failed'])
+                ->count();
 
-        $this->unsyncedTransactions = Transaction::where(function ($q) {
-            $q->where('updated_at', '>', $this->lastSyncAt)
-              ->orWhere('created_at', '>', $this->lastSyncAt);
-        })->count();
+            // Get the latest sync time from completed sync logs
+            $latestCompletedSync = SyncLog::where('sync_status', 'completed')
+                ->latest('synced_at')
+                ->first();
+
+            if ($latestCompletedSync && $latestCompletedSync->synced_at) {
+                $this->lastSyncAt = $latestCompletedSync->synced_at->toDateTimeString();
+            } else {
+                // Fallback to file-based approach if no completed syncs exist
+                $filePath = storage_path('app/sync_data/transactions_last_sync.dat');
+                $fallback = '1970-01-01 00:00:00';
+
+                $lastSync = $fallback;
+                if (File::exists($filePath)) {
+                    $content = trim((string) File::get($filePath));
+                    $lastSync = $content !== '' ? $content : $fallback;
+                }
+
+                try {
+                    $parsed = Carbon::parse($lastSync);
+                    $this->lastSyncAt = $parsed->toDateTimeString();
+                } catch (\Throwable $e) {
+                    $this->lastSyncAt = $fallback;
+                }
+            }
+
+        } catch (\Exception $e) {
+            // Fallback to file-based approach on error
+            $filePath = storage_path('app/sync_data/transactions_last_sync.dat');
+            $fallback = '1970-01-01 00:00:00';
+
+            $lastSync = $fallback;
+            if (File::exists($filePath)) {
+                $content = trim((string) File::get($filePath));
+                $lastSync = $content !== '' ? $content : $fallback;
+            }
+
+            try {
+                $parsed = Carbon::parse($lastSync);
+                $this->lastSyncAt = $parsed->toDateTimeString();
+            } catch (\Throwable $e) {
+                $this->lastSyncAt = $fallback;
+            }
+
+            // Fallback to timestamp-based counting
+            $this->unsyncedTransactions = Transaction::where(function ($q) {
+                $q->where('updated_at', '>', $this->lastSyncAt)
+                  ->orWhere('created_at', '>', $this->lastSyncAt);
+            })->count();
+        }
     }
 
     public function checkConnectivity(): void
