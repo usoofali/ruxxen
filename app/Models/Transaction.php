@@ -30,7 +30,7 @@ class Transaction extends Model
     ];
 
     /**
-     * Boot method to generate transaction number
+     * Boot method to generate transaction number and create sync log
      */
     protected static function boot()
     {
@@ -40,6 +40,11 @@ class Transaction extends Model
             if (empty($transaction->transaction_number)) {
                 $transaction->transaction_number = self::generateTransactionNumber();
             }
+        });
+
+        static::created(function ($transaction) {
+            // Automatically create a sync log for every new transaction
+            $transaction->createSyncLog();
         });
     }
 
@@ -61,6 +66,22 @@ class Transaction extends Model
     public function cashier()
     {
         return $this->belongsTo(User::class, 'cashier_id');
+    }
+
+    /**
+     * Get sync logs for this transaction
+     */
+    public function syncLogs()
+    {
+        return $this->hasMany(SyncLog::class);
+    }
+
+    /**
+     * Get the latest sync log for this transaction
+     */
+    public function latestSyncLog()
+    {
+        return $this->hasOne(SyncLog::class)->latest();
     }
 
     /**
@@ -93,7 +114,7 @@ class Transaction extends Model
      */
     public function getFormattedTotalAttribute(): string
     {
-        return '₦' . number_format($this->total_amount, 2);
+        return '₦' . number_format((float) $this->total_amount, 2);
     }
 
     /**
@@ -101,7 +122,7 @@ class Transaction extends Model
      */
     public function getFormattedQuantityAttribute(): string
     {
-        return number_format($this->quantity_kg, 2) . ' kg';
+        return number_format((float) $this->quantity_kg, 2) . ' kg';
     }
 
     /**
@@ -109,6 +130,49 @@ class Transaction extends Model
      */
     public function getFormattedPricePerKgAttribute(): string
     {
-        return '₦' . number_format($this->price_per_kg, 2);
+        return '₦' . number_format((float) $this->price_per_kg, 2);
+    }
+
+    /**
+     * Create a sync log for this transaction
+     */
+    public function createSyncLog(): SyncLog
+    {
+        return $this->syncLogs()->create([
+            'sync_status' => SyncLog::STATUS_PENDING,
+        ]);
+    }
+
+    /**
+     * Check if transaction has pending sync
+     */
+    public function hasPendingSync(): bool
+    {
+        return $this->syncLogs()->pending()->exists();
+    }
+
+    /**
+     * Check if transaction has completed sync
+     */
+    public function hasCompletedSync(): bool
+    {
+        return $this->syncLogs()->completed()->exists();
+    }
+
+    /**
+     * Check if transaction has failed sync
+     */
+    public function hasFailedSync(): bool
+    {
+        return $this->syncLogs()->failed()->exists();
+    }
+
+    /**
+     * Get the current sync status
+     */
+    public function getCurrentSyncStatus(): ?string
+    {
+        $latestSyncLog = $this->latestSyncLog;
+        return $latestSyncLog ? $latestSyncLog->sync_status : null;
     }
 }

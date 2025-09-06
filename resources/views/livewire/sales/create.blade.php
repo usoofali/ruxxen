@@ -94,7 +94,7 @@ new #[Layout('components.layouts.app')] class extends Component {
 
         // Check if sufficient stock
         if ($this->quantity_kg > $this->inventory->current_stock) {
-            $this->addError('quantity_kg', 'Insufficient stock. Available: ' . number_format($this->inventory->current_stock, 2) . ' kg');
+            $this->addError('quantity_kg', 'Insufficient stock. Available: ' . number_format((float) $this->inventory->current_stock, 2) . ' kg');
             return;
         }
 

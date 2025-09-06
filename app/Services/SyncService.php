@@ -344,12 +344,22 @@ class SyncService
         }
 
         try {
+            // For Transaction model, mark sync logs as syncing
+            if ($modelInfo['class'] === 'App\Models\Transaction') {
+                $this->markTransactionSyncLogsAsSyncing($changes);
+            }
+
             $response = Http::timeout($this->syncTimeout)
                 ->withHeaders(['Content-Type' => 'application/json'])
                 ->post("{$this->syncUrl}/push/{$tableName}", $changes);
 
             if (!$response->successful()) {
                 throw new \Exception("Server responded with HTTP {$response->status()}");
+            }
+
+            // For Transaction model, update sync logs to completed
+            if ($modelInfo['class'] === 'App\Models\Transaction') {
+                $this->updateTransactionSyncLogs($changes, 'completed');
             }
 
             $this->updateLastSyncTime($tableName);
@@ -362,6 +372,11 @@ class SyncService
 
         } catch (\Exception $e) {
             $errorMessage = $e->getMessage();
+            
+            // For Transaction model, update sync logs to failed
+            if ($modelInfo['class'] === 'App\Models\Transaction') {
+                $this->updateTransactionSyncLogs($changes, 'failed', $errorMessage);
+            }
             
             // Check if it's a network/connection error
             if (str_contains($errorMessage, 'HTTP 404') || str_contains($errorMessage, 'HTTP 5')) {
@@ -385,6 +400,13 @@ class SyncService
     {
         try {
             $modelClass = $modelInfo['class'];
+            
+            // Special handling for Transaction model - use sync_log to get unsynced transactions
+            if ($modelClass === 'App\Models\Transaction') {
+                return $this->getUnsyncedTransactions();
+            }
+            
+            // For other models, use the original timestamp-based approach
             $lastSync = $this->getLastSyncTime($tableName);
 
             // Get records updated or created after last sync
@@ -412,6 +434,106 @@ class SyncService
 
         } catch (\Exception $e) {
             $this->log('error', "Failed getting changes for {$tableName}: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Mark transaction sync logs as syncing
+     */
+    protected function markTransactionSyncLogsAsSyncing(array $transactions): void
+    {
+        try {
+            $transactionIds = array_column($transactions, 'id');
+            
+            if (empty($transactionIds)) {
+                return;
+            }
+
+            $syncLogs = \App\Models\SyncLog::whereIn('transaction_id', $transactionIds)
+                ->where('sync_status', 'pending')
+                ->get();
+
+            foreach ($syncLogs as $syncLog) {
+                $syncLog->markAsSyncing();
+            }
+
+            $this->log('info', "Marked " . count($syncLogs) . " sync logs as syncing");
+
+        } catch (\Exception $e) {
+            $this->log('error', "Failed marking transaction sync logs as syncing: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update transaction sync logs based on sync result
+     */
+    protected function updateTransactionSyncLogs(array $transactions, string $status, string $errorMessage = null): void
+    {
+        try {
+            $transactionIds = array_column($transactions, 'id');
+            
+            if (empty($transactionIds)) {
+                return;
+            }
+
+            $syncLogs = \App\Models\SyncLog::whereIn('transaction_id', $transactionIds)
+                ->whereIn('sync_status', ['pending', 'syncing'])
+                ->get();
+
+            foreach ($syncLogs as $syncLog) {
+                if ($status === 'completed') {
+                    $syncLog->markAsCompleted();
+                } elseif ($status === 'failed') {
+                    $syncLog->markAsFailed($errorMessage);
+                }
+            }
+
+            $this->log('info', "Updated " . count($syncLogs) . " sync logs to status: {$status}");
+
+        } catch (\Exception $e) {
+            $this->log('error', "Failed updating transaction sync logs: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get unsynced transactions using sync_log table
+     */
+    protected function getUnsyncedTransactions(): array
+    {
+        try {
+            // Get transactions that have pending or failed sync logs
+            $unsyncedTransactionIds = \App\Models\SyncLog::whereIn('sync_status', ['pending', 'failed'])
+                ->pluck('transaction_id')
+                ->toArray();
+
+            if (empty($unsyncedTransactionIds)) {
+                $this->log('info', "No unsynced transactions found");
+                return [];
+            }
+
+            // Get the actual transaction data
+            $transactions = \App\Models\Transaction::whereIn('id', $unsyncedTransactionIds)
+                ->get()
+                ->map(function ($transaction) {
+                    $array = $transaction->toArray();
+                    
+                    // Process date fields
+                    foreach ($this->dateFields as $field) {
+                        if (isset($array[$field])) {
+                            $array[$field] = $this->validateDate($array[$field]);
+                        }
+                    }
+                    
+                    return $array;
+                })
+                ->toArray();
+
+            $this->log('info', "Found " . count($transactions) . " unsynced transactions");
+            return $transactions;
+
+        } catch (\Exception $e) {
+            $this->log('error', "Failed getting unsynced transactions: " . $e->getMessage());
             return [];
         }
     }

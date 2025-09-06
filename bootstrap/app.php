@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'pull_success' => $result['pull']['success'],
                 'push_success' => $result['push']['success']
             ]);
-        })->everyFiveMinutes();
+        })->everyMinute();
 
         // Clean up old log files daily at 2:00 AM
         $schedule->call(function () {
