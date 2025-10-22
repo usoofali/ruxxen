@@ -26,6 +26,26 @@ class SyncLog extends Model
     ];
 
     /**
+     * Boot method to add flash messages
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($syncLog) {
+            session()->flash('success', 'Sync log created successfully.');
+        });
+
+        static::updated(function ($syncLog) {
+            session()->flash('success', 'Sync log updated successfully.');
+        });
+
+        static::deleted(function ($syncLog) {
+            session()->flash('success', 'Sync log deleted successfully.');
+        });
+    }
+
+    /**
      * Sync status constants
      */
     public const STATUS_PENDING = 'pending';

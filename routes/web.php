@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Volt::route('admin/transactions', 'admin.transactions')->name('admin.transactions');
         Volt::route('admin/reports', 'admin.reports')->name('admin.reports');
         Volt::route('admin/users', 'admin.users')->name('admin.users');
+        Volt::route('admin/discounts', 'admin.discounts')->name('admin.discounts');
     });
 
                // Shared Routes (both admin and cashier)

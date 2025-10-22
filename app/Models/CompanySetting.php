@@ -32,6 +32,26 @@ class CompanySetting extends Model
     ];
 
     /**
+     * Boot method to add flash messages
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($setting) {
+            session()->flash('success', 'Company settings created successfully.');
+        });
+
+        static::updated(function ($setting) {
+            session()->flash('success', 'Company settings updated successfully.');
+        });
+
+        static::deleted(function ($setting) {
+            session()->flash('success', 'Company settings deleted successfully.');
+        });
+    }
+
+    /**
      * Get the SMTP password attribute (decrypted)
      */
     protected function smtpPassword(): Attribute

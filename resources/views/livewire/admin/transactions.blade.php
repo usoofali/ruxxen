@@ -41,7 +41,7 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     public function getTransactionsProperty()
     {
-        $query = Transaction::with('cashier');
+        $query = Transaction::with(['cashier', 'customerDiscount']);
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -163,7 +163,7 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     public function exportTransactions()
     {
-        $query = Transaction::with('cashier');
+        $query = Transaction::with(['cashier', 'customerDiscount']);
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -414,6 +414,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Customer</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Quantity</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Discount</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Payment</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
@@ -442,6 +443,12 @@ new #[Layout('components.layouts.app')] class extends Component {
                                     <td class="whitespace-nowrap px-6 py-4">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $transaction->formatted_total }}</div>
                                         <div class="text-xs text-gray-500 dark:text-gray-400">{{ $transaction->formatted_price_per_kg }}</div>
+                                    </td>
+                                    <td class="whitespace-nowrap px-6 py-4">
+                                        <div class="text-sm text-gray-900 dark:text-white">{{ $transaction->customerDiscount->name ?? 'N/A' }}</div>
+                                        @if($transaction->customerDiscount && $transaction->customerDiscount->discount_per_kg > 0)
+                                            <div class="text-xs text-red-600 dark:text-red-400">-{{ $transaction->customerDiscount->formatted_discount }}</div>
+                                        @endif
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4">
                                         <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
@@ -543,9 +550,19 @@ new #[Layout('components.layouts.app')] class extends Component {
                                     <span class="font-medium text-gray-900 dark:text-white">{{ $selectedTransaction->formatted_quantity }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-gray-600 dark:text-gray-400">Price per kg:</span>
+                                    <span class="text-gray-600 dark:text-gray-400">Original Price:</span>
                                     <span class="font-medium text-gray-900 dark:text-white">{{ $selectedTransaction->formatted_price_per_kg }}</span>
                                 </div>
+                                @if($selectedTransaction->customerDiscount && $selectedTransaction->customerDiscount->discount_per_kg > 0)
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600 dark:text-gray-400">Discount ({{ $selectedTransaction->customerDiscount->name }}):</span>
+                                        <span class="font-medium text-red-600 dark:text-red-400">-{{ $selectedTransaction->customerDiscount->formatted_discount }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600 dark:text-gray-400">Effective Price:</span>
+                                        <span class="font-medium text-gray-900 dark:text-white">{{ $selectedTransaction->formatted_effective_price_per_kg }}</span>
+                                    </div>
+                                @endif
                                 <div class="flex justify-between">
                                     <span class="text-gray-600 dark:text-gray-400">Total Amount:</span>
                                     <span class="font-medium text-gray-900 dark:text-white">{{ $selectedTransaction->formatted_total }}</span>
@@ -602,5 +619,20 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </div>
             </div>
         </div>
+    @endif
+    <!-- Flash Message -->
+    @if (session()->has('error'))
+        <div class="fixed bottom-4 right-4 z-50">
+        <x-alert variant="error" :timeout="5000">
+            {{ session('error') }}
+        </x-alert>
+    </div>
+    @endif
+    @if (session()->has('success'))
+        <div class="fixed bottom-4 right-4 z-50">
+        <x-alert variant="success" :timeout="5000">
+            {{ session('success') }}
+        </x-alert>
+    </div>
     @endif
 </div>

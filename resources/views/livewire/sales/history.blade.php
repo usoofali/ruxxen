@@ -31,7 +31,7 @@ new #[Layout('components.layouts.app')] class extends Component {
     public function getTransactionsProperty()
     {
         $query = Transaction::where('cashier_id', Auth::id())
-            ->with('cashier');
+            ->with(['cashier', 'customerDiscount']);
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -575,5 +575,20 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </div>
             </div>
         </div>
+    @endif
+    <!-- Flash Message -->
+    @if (session()->has('error'))
+        <div class="fixed bottom-4 right-4 z-50">
+        <x-alert variant="error" :timeout="5000">
+            {{ session('error') }}
+        </x-alert>
+    </div>
+    @endif
+    @if (session()->has('success'))
+        <div class="fixed bottom-4 right-4 z-50">
+        <x-alert variant="success" :timeout="5000">
+            {{ session('success') }}
+        </x-alert>
+    </div>
     @endif
 </div>

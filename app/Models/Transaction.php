@@ -13,6 +13,7 @@ class Transaction extends Model
     protected $fillable = [
         'transaction_number',
         'cashier_id',
+        'customer_discount_id',
         'quantity_kg',
         'price_per_kg',
         'total_amount',
@@ -40,11 +41,22 @@ class Transaction extends Model
             if (empty($transaction->transaction_number)) {
                 $transaction->transaction_number = self::generateTransactionNumber();
             }
+            
+            // Auto-assign default discount if not provided
+            if (empty($transaction->customer_discount_id)) {
+                $defaultDiscount = CustomerDiscount::getDefault();
+                if ($defaultDiscount) {
+                    $transaction->customer_discount_id = $defaultDiscount->id;
+                }
+            }
         });
 
         static::created(function ($transaction) {
             // Automatically create a sync log for every new transaction
             $transaction->createSyncLog();
+            
+            // Add success flash message
+            session()->flash('success', 'Transaction created successfully.');
         });
     }
 
@@ -66,6 +78,14 @@ class Transaction extends Model
     public function cashier()
     {
         return $this->belongsTo(User::class, 'cashier_id');
+    }
+
+    /**
+     * Get customer discount for this transaction
+     */
+    public function customerDiscount()
+    {
+        return $this->belongsTo(CustomerDiscount::class);
     }
 
     /**
@@ -131,6 +151,25 @@ class Transaction extends Model
     public function getFormattedPricePerKgAttribute(): string
     {
         return '₦' . number_format((float) $this->price_per_kg, 2);
+    }
+
+    /**
+     * Get effective price per kg (after discount)
+     */
+    public function getEffectivePricePerKgAttribute(): float
+    {
+        if ($this->customerDiscount) {
+            return $this->customerDiscount->getEffectivePricePerKg((float) $this->price_per_kg);
+        }
+        return (float) $this->price_per_kg;
+    }
+
+    /**
+     * Get formatted effective price per kg
+     */
+    public function getFormattedEffectivePricePerKgAttribute(): string
+    {
+        return '₦' . number_format($this->effective_price_per_kg, 2);
     }
 
     /**

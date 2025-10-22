@@ -63,6 +63,8 @@ class Inventory extends Model
             'reason' => $reason,
             'notes' => $notes,
         ]);
+
+        session()->flash('success', "Stock added successfully. Added {$quantity} kg to inventory.");
     }
 
     /**
@@ -71,6 +73,7 @@ class Inventory extends Model
     public function subtractStock(float $quantity, string $reason, User $user, ?string $notes = null): bool
     {
         if ($this->current_stock < $quantity) {
+            session()->flash('error', 'Insufficient stock. Cannot subtract more than available stock.');
             return false; // Insufficient stock
         }
 
@@ -89,6 +92,7 @@ class Inventory extends Model
             'notes' => $notes,
         ]);
 
+        session()->flash('success', "Sale Completed, {$quantity} kg removed from inventory.");
         return true;
     }
 

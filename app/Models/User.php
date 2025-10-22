@@ -51,6 +51,26 @@ class User extends Authenticatable
     }
 
     /**
+     * Boot method to add flash messages
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($user) {
+            session()->flash('success', "User '{$user->name}' created successfully.");
+        });
+
+        static::updated(function ($user) {
+            session()->flash('success', "User '{$user->name}' updated successfully.");
+        });
+
+        static::deleted(function ($user) {
+            session()->flash('success', "User '{$user->name}' deleted successfully.");
+        });
+    }
+
+    /**
      * Get the user's initials
      */
     public function initials(): string

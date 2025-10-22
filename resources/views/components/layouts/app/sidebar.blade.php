@@ -24,6 +24,7 @@
                         <flux:navlist.item icon="cube" :href="route('admin.inventory')" :current="request()->routeIs('admin.inventory')" wire:navigate>{{ __('Inventory') }}</flux:navlist.item>
                         <flux:navlist.item icon="currency-dollar" :href="route('admin.transactions')" :current="request()->routeIs('admin.transactions')" wire:navigate>{{ __('Transactions') }}</flux:navlist.item>
                         <flux:navlist.item icon="chart-bar" :href="route('admin.reports')" :current="request()->routeIs('admin.reports')" wire:navigate>{{ __('Reports') }}</flux:navlist.item>
+                        <flux:navlist.item icon="hand-thumb-up" :href="route('admin.discounts')" :current="request()->routeIs('admin.discounts')" wire:navigate>{{ __('Discounts') }}</flux:navlist.item>
                         <flux:navlist.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>{{ __('Users') }}</flux:navlist.item>
                     @endif
                 </flux:navlist.group>

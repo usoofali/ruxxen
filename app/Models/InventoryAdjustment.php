@@ -26,6 +26,27 @@ class InventoryAdjustment extends Model
     ];
 
     /**
+     * Boot method to add flash messages
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($adjustment) {
+            $action = $adjustment->type === 'addition' ? 'added' : 'removed';
+            session()->flash('success', "Inventory adjustment recorded successfully. {$adjustment->formatted_quantity} {$action}.");
+        });
+
+        static::updated(function ($adjustment) {
+            session()->flash('success', 'Inventory adjustment updated successfully.');
+        });
+
+        static::deleted(function ($adjustment) {
+            session()->flash('success', 'Inventory adjustment deleted successfully.');
+        });
+    }
+
+    /**
      * Get user who made the adjustment
      */
     public function user()

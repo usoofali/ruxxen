@@ -2,6 +2,7 @@
 
 use App\Models\Inventory;
 use App\Models\Transaction;
+use App\Models\CustomerDiscount;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
@@ -27,8 +28,12 @@ new #[Layout('components.layouts.app')] class extends Component {
     #[Validate('required|in:cash,card,transfer')]
     public string $payment_type = 'cash';
 
+    #[Validate('required|exists:customer_discounts,id')]
+    public ?int $customer_discount_id = null;
+
     public $inventory;
     public $price_per_kg;
+    public $effective_price_per_kg;
     public $showReceipt = false;
     public $currentTransaction = null;
     public $calculationMode = 'quantity'; // 'quantity' or 'total'
@@ -37,6 +42,14 @@ new #[Layout('components.layouts.app')] class extends Component {
     {
         $this->inventory = Inventory::first();
         $this->price_per_kg = $this->inventory->price_per_kg;
+        
+        // Set default discount
+        $defaultDiscount = CustomerDiscount::getDefault();
+        if ($defaultDiscount) {
+            $this->customer_discount_id = $defaultDiscount->id;
+        }
+        
+        $this->updateEffectivePrice();
         $this->calculateTotal(); // Initialize the total amount
     }
     
@@ -44,9 +57,9 @@ new #[Layout('components.layouts.app')] class extends Component {
     {
         try {
             $quantity = $this->nullSafeFloat($this->quantity_kg);
-            $price = $this->nullSafeFloat($this->price_per_kg);
+            $price = $this->nullSafeFloat($this->effective_price_per_kg);
             $this->total_amount = max(0, round($quantity * $price, 2));
-            $this->quantity_kg = max(0,$this->total_amount / $this->price_per_kg);
+            $this->quantity_kg = max(0,$this->total_amount / $this->effective_price_per_kg);
         } catch (\Throwable $e) {
             $this->total_amount = 0.0;
             logger()->error('CalculateTotal error: ' . $e->getMessage());
@@ -57,12 +70,12 @@ new #[Layout('components.layouts.app')] class extends Component {
     {
         try {
             $total = $this->nullSafeFloat($this->total_amount);
-            $price = $this->nullSafeFloat($this->price_per_kg);
+            $price = $this->nullSafeFloat($this->effective_price_per_kg);
             
             $this->quantity_kg = $price > 0 
                 ? max(0, round($total / $price, 3))
                 : 0.0;
-            $this->total_amount = max(0,$this->quantity_kg * $this->price_per_kg); 
+            $this->total_amount = max(0,$this->quantity_kg * $this->effective_price_per_kg); 
         } catch (\Throwable $e) {
             $this->quantity_kg = 0.0;
             logger()->error('CalculateQuantity error: ' . $e->getMessage());
@@ -80,6 +93,31 @@ new #[Layout('components.layouts.app')] class extends Component {
         }
         
         throw new \InvalidArgumentException("Invalid numeric value: " . print_r($value, true));
+    }
+
+    public function updatedCustomerDiscountId()
+    {
+        $this->updateEffectivePrice();
+        $this->calculateTotal();
+    }
+
+    public function updateEffectivePrice()
+    {
+        if ($this->customer_discount_id) {
+            $discount = CustomerDiscount::find($this->customer_discount_id);
+            if ($discount) {
+                $this->effective_price_per_kg = $discount->getEffectivePricePerKg((float) $this->price_per_kg);
+            } else {
+                $this->effective_price_per_kg = $this->price_per_kg;
+            }
+        } else {
+            $this->effective_price_per_kg = $this->price_per_kg;
+        }
+    }
+
+    public function getCustomerDiscountsProperty()
+    {
+        return CustomerDiscount::active()->orderBy('is_default', 'desc')->orderBy('name')->get();
     }
 
     public function createSale()
@@ -104,6 +142,7 @@ new #[Layout('components.layouts.app')] class extends Component {
             // Create transaction
             $transaction = Transaction::create([
                 'cashier_id' => Auth::id(),
+                'customer_discount_id' => $this->customer_discount_id,
                 'quantity_kg' => $this->quantity_kg,
                 'price_per_kg' => $this->price_per_kg,
                 'total_amount' => $this->total_amount,
@@ -131,6 +170,14 @@ new #[Layout('components.layouts.app')] class extends Component {
             // Reset form
             $this->reset(['quantity_kg', 'total_amount', 'customer_name', 'customer_phone', 'payment_type', 'notes']);
             $this->payment_type = 'cash'; // Ensure default is set after reset
+            
+            // Reset discount to default
+            $defaultDiscount = CustomerDiscount::getDefault();
+            if ($defaultDiscount) {
+                $this->customer_discount_id = $defaultDiscount->id;
+            }
+            
+            $this->updateEffectivePrice();
             $this->calculateTotal();
 
             // Refresh inventory
@@ -364,9 +411,19 @@ new #[Layout('components.layouts.app')] class extends Component {
                             <span class="font-medium text-gray-900 dark:text-white">{{ $currentTransaction->formatted_quantity }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Price per kg:</span>
+                            <span class="text-gray-600 dark:text-gray-400">Original Price:</span>
                             <span class="font-medium text-gray-900 dark:text-white">{{ $currentTransaction->formatted_price_per_kg }}</span>
                         </div>
+                        @if($currentTransaction->customerDiscount && $currentTransaction->customerDiscount->discount_per_kg > 0)
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400">Discount ({{ $currentTransaction->customerDiscount->name }}):</span>
+                                <span class="font-medium text-red-600 dark:text-red-400">-{{ $currentTransaction->customerDiscount->formatted_discount }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-400">Effective Price:</span>
+                                <span class="font-medium text-gray-900 dark:text-white">{{ $currentTransaction->formatted_effective_price_per_kg }}</span>
+                            </div>
+                        @endif
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-400">Payment Type:</span>
                             <span class="font-medium text-gray-900 dark:text-white">{{ ucfirst($currentTransaction->payment_type) }}</span>
@@ -470,27 +527,45 @@ new #[Layout('components.layouts.app')] class extends Component {
             <div class="rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:border-blue-700 dark:from-blue-900/20 dark:to-indigo-900/20">
                 <div class="text-center">
                     <h3 class="text-lg font-medium text-blue-900 dark:text-blue-100">Total Amount</h3>
-                    <div class="mt-2">
-                        <span class="text-4xl font-bold text-blue-600 dark:text-blue-400 sm:text-5xl lg:text-6xl">
+                    <div class="mt-1">
+                        <span class="text-3xl font-bold text-blue-600 dark:text-blue-400 sm:text-5xl lg:text-5xl">
                             ₦{{ number_format($total_amount, 2) }}
                         </span>
                     </div>
-                    <p class="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                        {{ number_format($quantity_kg, 2) }} kg × ₦{{ number_format($price_per_kg, 2) }} per kg
+                    <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                        {{ number_format($quantity_kg, 2) }} kg × ₦{{ number_format($effective_price_per_kg, 2) }} per kg
                     </p>
                 </div>
             </div>
 
                         <!-- Sale Form -->
             <div class="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:p-6">
-                <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Sale Details</h3>
 
                 <form wire:submit="createSale" id="sale-form" class="space-y-4">
+                    
+                    <!-- Effective Price Display -->
+                    <div class="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-blue-700 dark:text-blue-300">Original Price:</span>
+                            <span class="text-sm font-medium text-blue-900 dark:text-blue-100">₦{{ number_format($price_per_kg, 2) }}</span>
+                        </div>
+                        @if($effective_price_per_kg < $price_per_kg)
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-sm text-blue-700 dark:text-blue-300">Discount:</span>
+                                <span class="text-sm font-medium text-blue-900 dark:text-blue-100">-₦{{ number_format($price_per_kg - $effective_price_per_kg, 2) }}</span>
+                            </div>
+                        @endif
+                        <div class="flex justify-between items-center mt-1 border-t border-blue-200 dark:border-blue-700 pt-1">
+                            <span class="text-sm font-semibold text-blue-900 dark:text-blue-100">Effective Price:</span>
+                            <span class="text-sm font-bold text-blue-900 dark:text-blue-100">₦{{ number_format($effective_price_per_kg, 2) }}</span>
+                        </div>
+                    </div>
+
                     <!-- Quantity and Total Amount Row -->
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                         <flux:input
-                            wire:model.live.debounce.500ms="quantity_kg"
+                            wire:model.lazy="quantity_kg"
                             wire:change="calculateTotal"
                             label="Quantity (kg)"
                             type="number"
@@ -508,7 +583,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                         <div>
                         <div>
                             <flux:input
-                                wire:model.live.debounce.500ms="total_amount"
+                                wire:model.lazy="total_amount"
                                 wire:change="calculateQuantity"
                                 label="Total Amount (₦)"
                                 type="number"
@@ -523,7 +598,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                             @enderror
                         </div>
                     </div>
-
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <!-- Price per kg (readonly) -->
                     <div>
                         <flux:input
@@ -535,7 +610,22 @@ new #[Layout('components.layouts.app')] class extends Component {
                             class="bg-gray-50 dark:bg-gray-700"
                         />
                     </div>
-
+                    <!-- Customer Discount Selection -->
+                    <div>
+                        <flux:select wire:model.live="customer_discount_id" label="Customer Type" required>
+                            @foreach($this->customerDiscounts as $discount)
+                                <option value="{{ $discount->id }}">{{ $discount->name }} 
+                                    @if($discount->discount_per_kg > 0)
+                                        ({{ $discount->formatted_discount }} off)
+                                    @endif
+                                </option>
+                            @endforeach
+                        </flux:select>
+                        @error('customer_discount_id')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
                     <!-- Customer Information Row -->
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
@@ -648,6 +738,21 @@ new #[Layout('components.layouts.app')] class extends Component {
             </div>
         </div>
     </div>
+    <!-- Flash Message -->
+    @if (session()->has('error'))
+        <div class="fixed bottom-4 right-4 z-50">
+        <x-alert variant="error" :timeout="5000">
+            {{ session('error') }}
+        </x-alert>
+    </div>
+    @endif
+    @if (session()->has('success'))
+        <div class="fixed bottom-4 right-4 z-50">
+        <x-alert variant="success" :timeout="5000">
+            {{ session('success') }}
+        </x-alert>
+    </div>
+    @endif
 </div>
 
 
