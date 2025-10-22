@@ -304,6 +304,7 @@ class SyncService
 
         foreach ($models as $tableName => $modelInfo) {
             try {
+                
                 $result = $this->pushModelToMaster($tableName, $modelInfo);
                 $results[$tableName] = $result;
                 
@@ -411,8 +412,8 @@ class SyncService
 
             // Get records updated or created after last sync
             $changes = $modelClass::where(function ($query) use ($lastSync) {
-                $query->where('updated_at', '>', $lastSync)
-                      ->orWhere('created_at', '>', $lastSync);
+                $query->where('updated_at', '>=', $lastSync)
+                      ->orWhere('created_at', '>=', $lastSync);
             })
             ->get()
             ->map(function ($item) {
@@ -751,8 +752,8 @@ class SyncService
             try {
                 $totalRecords = $modelClass::count();
                 $recentRecords = $modelClass::where(function ($query) use ($lastSync) {
-                    $query->where('updated_at', '>', $lastSync)
-                          ->orWhere('created_at', '>', $lastSync);
+                    $query->where('updated_at', '>=', $lastSync)
+                          ->orWhere('created_at', '>=', $lastSync);
                 })->count();
 
                 $status[$tableName] = [
