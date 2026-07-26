@@ -22,11 +22,16 @@ from ui.login_window import PySideLoginWindow, TkinterLoginWindow, PYSIDE_AVAILA
 from ui.pos_window import PySidePosWindow, TkinterPosWindow
 
 
+from config import get_server_url
+
 def main():
     db = LocalDatabase()
     
     # Check server URL setting
-    server_url = db.get_setting("server_url", "http://localhost:8000")
+    default_url = get_server_url("https://app.ruxxengas.com")
+    server_url = db.get_setting("server_url")
+    if not server_url or "localhost" in server_url:
+        server_url = default_url
     api = ApiClient(base_url=server_url)
     printer = ThermalPrinterService()
     sync_worker = SyncWorker(db, api)

@@ -1,8 +1,11 @@
 import requests
 import json
+from config import get_server_url
 
 class ApiClient:
-    def __init__(self, base_url="http://localhost:8000"):
+    def __init__(self, base_url=None):
+        if not base_url or "localhost" in base_url:
+            base_url = get_server_url("https://app.ruxxengas.com")
         self.base_url = base_url.rstrip('/')
         self.api_prefix = f"{self.base_url}/api/v1/pos"
 

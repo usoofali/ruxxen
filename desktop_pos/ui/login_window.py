@@ -1,5 +1,6 @@
 import sys
 import os
+from config import get_server_url
 
 try:
     from PySide6.QtWidgets import (
@@ -28,7 +29,7 @@ class PySideLoginWindow(QWidget):
 
     def init_ui(self):
         self.setWindowTitle("Ruxxen Gas POS - Terminal Login")
-        self.setFixedSize(460, 640)
+        self.setFixedSize(460, 560)
         self.setStyleSheet("""
             QWidget {
                 background-color: #0f172a;
@@ -138,13 +139,6 @@ class PySideLoginWindow(QWidget):
         card_layout.addWidget(subtitle)
         card_layout.addSpacing(5)
 
-        # Server URL
-        lbl_url = QLabel("Server Address:")
-        lbl_url.setObjectName("input_lbl")
-        self.txt_url = QLineEdit()
-        saved_url = self.db.get_setting("server_url", "http://localhost:8000")
-        self.txt_url.setText(saved_url)
-
         # Email
         lbl_email = QLabel("Cashier Email:")
         lbl_email.setObjectName("input_lbl")
@@ -158,8 +152,6 @@ class PySideLoginWindow(QWidget):
         self.txt_pwd.setEchoMode(QLineEdit.Password)
         self.txt_pwd.setPlaceholderText("••••••••")
 
-        card_layout.addWidget(lbl_url)
-        card_layout.addWidget(self.txt_url)
         card_layout.addWidget(lbl_email)
         card_layout.addWidget(self.txt_email)
         card_layout.addWidget(lbl_pwd)
@@ -174,7 +166,6 @@ class PySideLoginWindow(QWidget):
         main_layout.addWidget(card)
 
     def handle_login(self):
-        url = self.txt_url.text().strip()
         email = self.txt_email.text().strip()
         pwd = self.txt_pwd.text().strip()
 
@@ -182,6 +173,7 @@ class PySideLoginWindow(QWidget):
             QMessageBox.warning(self, "Input Error", "Please enter cashier email and password.")
             return
 
+        url = get_server_url("https://app.ruxxengas.com")
         self.api.set_base_url(url)
         self.db.set_setting("server_url", url)
 
@@ -209,7 +201,7 @@ class TkinterLoginWindow:
         
         self.root = tk.Tk()
         self.root.title("Ruxxen Gas POS - Terminal Login")
-        self.root.geometry("450x580")
+        self.root.geometry("450x500")
         self.root.configure(bg="#0f172a")
 
         asset_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets"))
@@ -238,12 +230,7 @@ class TkinterLoginWindow:
         frame = tk.Frame(self.root, bg="#1e293b", bd=1, relief="solid")
         frame.pack(padx=25, pady=5, fill="both", expand=True)
 
-        tk.Label(frame, text="Server URL:", font=("Arial", 10, "bold"), fg="#cbd5e1", bg="#1e293b").pack(anchor="w", padx=20, pady=(15, 2))
-        self.ent_url = tk.Entry(frame, font=("Arial", 11), width=30)
-        self.ent_url.insert(0, self.db.get_setting("server_url", "http://localhost:8000"))
-        self.ent_url.pack(padx=20, pady=(0, 10))
-
-        tk.Label(frame, text="Cashier Email:", font=("Arial", 10, "bold"), fg="#cbd5e1", bg="#1e293b").pack(anchor="w", padx=20, pady=(5, 2))
+        tk.Label(frame, text="Cashier Email:", font=("Arial", 10, "bold"), fg="#cbd5e1", bg="#1e293b").pack(anchor="w", padx=20, pady=(15, 2))
         self.ent_email = tk.Entry(frame, font=("Arial", 11), width=30)
         self.ent_email.pack(padx=20, pady=(0, 10))
 
@@ -255,7 +242,6 @@ class TkinterLoginWindow:
         btn.pack(padx=20, pady=15, fill="x")
 
     def handle_login(self):
-        url = self.ent_url.get().strip()
         email = self.ent_email.get().strip()
         pwd = self.ent_pwd.get().strip()
 
@@ -263,6 +249,7 @@ class TkinterLoginWindow:
             messagebox.showerror("Error", "Please enter email and password.")
             return
 
+        url = get_server_url("https://app.ruxxengas.com")
         self.api.set_base_url(url)
         self.db.set_setting("server_url", url)
 

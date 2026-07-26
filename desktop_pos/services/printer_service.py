@@ -14,7 +14,7 @@ class ThermalPrinterService:
         self.vendor_id = vendor_id
         self.product_id = product_id
 
-    def get_logo_escpos_bytes(self, logo_path="desktop_pos/assets/logo.jpg", target_width=240):
+    def get_logo_escpos_bytes(self, logo_path="desktop_pos/assets/logo.jpg", target_width=320):
         if not os.path.exists(logo_path):
             return b""
         try:
@@ -49,10 +49,10 @@ class ThermalPrinterService:
 
     def format_receipt_text(self, txn_data, company_data=None, copy_num=1, total_copies=1):
         company_data = company_data or {}
-        co_name = company_data.get('name', 'RUXXEN GAS PLANT').upper()
+        co_name = company_data.get('name', 'Ruxxen Investment Limited').upper()
         co_address = company_data.get('address', 'Along Bye Pass Zaria Road, Lalan Gusau, Zamfara State')
         co_phone = company_data.get('phone', '+234 123 456 7890')
-        co_email = company_data.get('email', 'info@ruxxenlpg.com')
+        co_email = company_data.get('email', 'ruxxentimessynergy@gmail.com')
         co_footer = company_data.get('receipt_footer', 'Thank you for buying from Ruxxen Gas!')
 
         def wrap_center(text, width=40):
@@ -118,7 +118,7 @@ class ThermalPrinterService:
     def print_receipt(self, txn_data, company_data=None, num_copies=2):
         printed_count = 0
         receipt_texts = []
-        logo_raster = self.get_logo_escpos_bytes(target_width=240)
+        logo_raster = self.get_logo_escpos_bytes(target_width=320)
 
         for copy_idx in range(1, num_copies + 1):
             receipt_text = self.format_receipt_text(txn_data, company_data, copy_num=copy_idx, total_copies=num_copies)
@@ -190,7 +190,7 @@ class ThermalPrinterService:
 
     def print_shift_summary(self, summary_data, company_data=None):
         company_data = company_data or {}
-        co_name = company_data.get('name', 'RUXXEN GAS PLANT').upper()
+        co_name = company_data.get('name', 'Ruxxen Investment Limited').upper()
         cashier_name = summary_data.get('cashier_name', 'Cashier')
         cashier_id = summary_data.get('cashier_id', 1)
         date_str = summary_data.get('date', datetime.now().strftime("%Y-%m-%d"))
@@ -221,7 +221,7 @@ class ThermalPrinterService:
         lines.append("========================================\n\n")
 
         receipt_text = "\n".join(lines)
-        logo_raster = self.get_logo_escpos_bytes(target_width=240)
+        logo_raster = self.get_logo_escpos_bytes(target_width=320)
 
         # Print via /dev/usb/lp*
         lp_ports = glob.glob('/dev/usb/lp*')
