@@ -40,39 +40,40 @@ new class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
-        <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
+    <x-settings.layout :heading="__('Update Password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
+        <form method="POST" wire:submit="updatePassword" class="my-4 space-y-6">
             <flux:input
                 wire:model="current_password"
-                :label="__('Current password')"
+                :label="__('Current Password')"
                 type="password"
                 required
                 autocomplete="current-password"
             />
             <flux:input
                 wire:model="password"
-                :label="__('New password')"
+                :label="__('New Password')"
                 type="password"
                 required
                 autocomplete="new-password"
             />
             <flux:input
                 wire:model="password_confirmation"
-                :label="__('Confirm Password')"
+                :label="__('Confirm New Password')"
                 type="password"
                 required
                 autocomplete="new-password"
             />
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
-                </div>
+            <div class="flex items-center gap-4 pt-2">
+                <button type="submit" class="rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 px-6 py-2.5 text-xs font-semibold text-white transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer">
+                    {{ __('Update Password') }}
+                </button>
 
-                <x-action-message class="me-3" on="password-updated">
+                <x-action-message class="text-xs font-semibold text-emerald-600 dark:text-emerald-400" on="password-updated">
                     {{ __('Saved.') }}
                 </x-action-message>
             </div>
         </form>
     </x-settings.layout>
 </section>
+

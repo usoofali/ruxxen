@@ -13,7 +13,6 @@ Volt::route('dashboard', 'dashboard')->middleware(['auth', 'verified'])->name('d
 Route::middleware(['auth', 'verified'])->group(function () {
     // Cashier Routes
     Route::middleware(['auth.role:cashier'])->group(function () {
-        Volt::route('sales', 'sales.create')->name('sales.create');
         Volt::route('sales/history', 'sales.history')->name('sales.history');
     });
 

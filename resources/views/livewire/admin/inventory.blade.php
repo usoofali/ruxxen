@@ -139,161 +139,183 @@ new #[Layout('components.layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="flex h-full w-full flex-1 flex-col gap-6 p-6">
+<div class="flex h-full w-full flex-1 flex-col gap-6 p-4 sm:p-6 md:p-8">
     <!-- Header -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex-1">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Inventory Management</h1>
-            <p class="text-gray-600 dark:text-gray-400">Monitor and adjust stock levels</p>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                    <span class="h-2 w-2 rounded-full bg-orange-500 dark:bg-orange-400 animate-pulse"></span>
+                    Inventory Controller
+                </span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Inventory Management</h1>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Monitor tank capacity, price per kg, and log stock additions</p>
         </div>
-        <div class="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:flex-shrink-0">
-            <flux:button wire:click="openSettingsModal" variant="outline" class="w-full sm:w-auto">
-                Settings
-            </flux:button>
-            <flux:button wire:click="openAdjustmentModal" variant="primary" class="w-full sm:w-auto">
+        <div class="flex items-center gap-3">
+            <button wire:click="openSettingsModal" class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/80 dark:bg-slate-800/80 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all shadow-sm cursor-pointer flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Pricing & Alerts
+            </button>
+            <button wire:click="openAdjustmentModal" class="rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 px-4 py-2.5 text-xs font-semibold text-white transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                 Make Adjustment
-            </flux:button>
+            </button>
         </div>
     </div>
 
-    <!-- Stock Overview -->
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
-        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
-                        <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                    </div>
+    <!-- Stock Overview Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <!-- Current Stock -->
+        <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+            <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Current Stock</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        {{ number_format($inventory->current_stock, 2) }} <span class="text-sm font-normal text-slate-500 dark:text-slate-400">kg</span>
+                    </p>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Current Stock</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($inventory->current_stock, 2) }} kg</p>
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                    </svg>
                 </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                <span>Real-time available LPG</span>
             </div>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900">
-                        <svg class="h-5 w-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                    </div>
+        <!-- Minimum Stock Threshold -->
+        <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+            <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Minimum Stock</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        {{ number_format($inventory->minimum_stock, 2) }} <span class="text-sm font-normal text-slate-500 dark:text-slate-400">kg</span>
+                    </p>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Minimum Stock</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($inventory->minimum_stock, 2) }} kg</p>
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
                 </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                <span>Low stock warning mark</span>
             </div>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900">
-                        <svg class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                        </svg>
-                    </div>
+        <!-- Price per kg -->
+        <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+            <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Price per kg</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">₦{{ number_format($inventory->price_per_kg, 2) }}</p>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Price per kg</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">₦{{ number_format($inventory->price_per_kg, 2) }}</p>
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
                 </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                <span>Base retail rate</span>
             </div>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-lg {{ $inventory->isLowStock() ? 'bg-red-100 dark:bg-red-900' : 'bg-green-100 dark:bg-green-900' }}">
-                        <svg class="h-5 w-5 {{ $inventory->isLowStock() ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Status</p>
-                    <p class="text-2xl font-bold {{ $inventory->isLowStock() ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
+        <!-- Inventory Status -->
+        <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+            <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Stock Status</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold {{ $inventory->isLowStock() ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' }} tracking-tight">
                         {{ $inventory->isLowStock() ? 'Low Stock' : 'Good' }}
                     </p>
                 </div>
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $inventory->isLowStock() ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/20' : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20' }} text-white shadow-lg group-hover:scale-110 transition-transform">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                <span class="{{ $inventory->isLowStock() ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' }} font-medium">{{ $inventory->isLowStock() ? 'Replenishment needed' : 'Sufficient supply' }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Stock Level Progress -->
-    <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Stock Level</h3>
+    <!-- Stock Level Progress Card -->
+    <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl overflow-hidden">
+        <h3 class="mb-3 text-lg font-bold text-slate-900 dark:text-white tracking-tight">Stock Level Capacity</h3>
         <div class="space-y-3">
-            <div class="flex justify-between text-sm">
-                <span class="text-gray-600 dark:text-gray-400">Current: {{ number_format($inventory->current_stock, 2) }} kg</span>
-                <span class="text-gray-600 dark:text-gray-400">Minimum: {{ number_format($inventory->minimum_stock, 2) }} kg</span>
+            <div class="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+                <span>Current: <strong class="text-slate-900 dark:text-white">{{ number_format($inventory->current_stock, 2) }} kg</strong></span>
+                <span>Minimum Mark: <strong class="text-slate-900 dark:text-white">{{ number_format($inventory->minimum_stock, 2) }} kg</strong></span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                <div class="bg-blue-600 h-2.5 rounded-full {{ $inventory->isLowStock() ? 'bg-red-600' : '' }}" 
+            <div class="w-full bg-slate-200/80 dark:bg-slate-800/80 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700/50">
+                <div class="h-full rounded-full transition-all duration-500 {{ $inventory->isLowStock() ? 'bg-gradient-to-r from-red-500 to-rose-600' : 'bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500' }}" 
                      style="width: {{ min(100, ($inventory->current_stock / max($inventory->minimum_stock, 1)) * 100) }}%"></div>
             </div>
-            <div class="text-xs text-gray-500 dark:text-gray-400">
-                {{ number_format(($inventory->current_stock / max($inventory->minimum_stock, 1)) * 100, 1) }}% of minimum stock level
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+                Operating at <strong class="text-slate-800 dark:text-slate-200">{{ number_format(($inventory->current_stock / max($inventory->minimum_stock, 1)) * 100, 1) }}%</strong> of defined minimum threshold
             </div>
         </div>
     </div>
 
-    <!-- Recent Adjustments -->
-    <div class="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-        <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Recent Adjustments</h3>
+    <!-- Adjustments Table Card -->
+    <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl shadow-xl dark:shadow-2xl overflow-hidden">
+        <div class="border-b border-slate-200/80 dark:border-slate-800/80 px-6 py-5 bg-slate-50/60 dark:bg-slate-950/40">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Recent Stock Adjustments</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Audit trail of gas refills, manual corrections, and stock losses</p>
         </div>
-        <div class="p-6">
+
+        <div class="p-0">
             @if($this->adjustments->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Quantity</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Previous</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">New</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Reason</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">User</th>
+                            <tr class="border-b border-slate-200/80 dark:border-slate-800/60 bg-slate-100/40 dark:bg-slate-950/20 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                <th class="px-6 py-4">Date & Time</th>
+                                <th class="px-6 py-4">Type</th>
+                                <th class="px-6 py-4">Quantity</th>
+                                <th class="px-6 py-4">Previous Stock</th>
+                                <th class="px-6 py-4">New Stock</th>
+                                <th class="px-6 py-4">Reason & Notes</th>
+                                <th class="px-6 py-4">Logged By</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                        <tbody class="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-sm">
                             @foreach($this->adjustments as $adjustment)
-                                <tr>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="text-sm text-gray-900 dark:text-white">{{ $adjustment->created_at->format('M d, Y H:i') }}</div>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                                    <td class="whitespace-nowrap px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+                                        {{ $adjustment->created_at->format('M d, Y • H:i') }}
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4">
-                                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                                            {{ $adjustment->type === 'addition' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 
-                                               ($adjustment->type === 'subtraction' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 
-                                                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200') }}">
+                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold 
+                                            {{ $adjustment->type === 'addition' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 
+                                               ($adjustment->type === 'subtraction' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 
+                                                'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20') }}">
                                             {{ $adjustment->type_label }}
                                         </span>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $adjustment->formatted_quantity }}</div>
+                                    <td class="whitespace-nowrap px-6 py-4 font-mono">
+                                        <span class="font-bold text-slate-900 dark:text-white">{{ $adjustment->formatted_quantity }}</span>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="text-sm text-gray-900 dark:text-white">{{ number_format($adjustment->previous_stock, 2) }} kg</div>
+                                    <td class="whitespace-nowrap px-6 py-4 text-slate-600 dark:text-slate-400">
+                                        {{ number_format($adjustment->previous_stock, 2) }} kg
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="text-sm text-gray-900 dark:text-white">{{ number_format($adjustment->new_stock, 2) }} kg</div>
+                                    <td class="whitespace-nowrap px-6 py-4 font-semibold text-slate-900 dark:text-white">
+                                        {{ number_format($adjustment->new_stock, 2) }} kg
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900 dark:text-white">{{ $adjustment->reason }}</div>
+                                        <div class="font-medium text-slate-900 dark:text-white">{{ $adjustment->reason }}</div>
                                         @if($adjustment->notes)
-                                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $adjustment->notes }}</div>
+                                            <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ $adjustment->notes }}</div>
                                         @endif
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="text-sm text-gray-900 dark:text-white">{{ $adjustment->user->name }}</div>
+                                        <div class="font-medium text-slate-900 dark:text-white">{{ $adjustment->user->name }}</div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -302,16 +324,18 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-6">
+                <div class="p-6 border-t border-slate-200/80 dark:border-slate-800/80">
                     {{ $this->adjustments->links() }}
                 </div>
             @else
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No adjustments</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No inventory adjustments have been made yet.</p>
+                <div class="text-center py-12 px-4">
+                    <div class="mx-auto h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-center text-slate-400 mb-3">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">No adjustments recorded</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Stock adjustments and refilling logs will appear here.</p>
                 </div>
             @endif
         </div>
@@ -319,20 +343,23 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     <!-- Adjustment Modal -->
     @if($showAdjustmentModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="w-full max-w-md rounded-xl bg-white p-6 dark:bg-gray-800">
-                <div class="mb-4">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Make Inventory Adjustment</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Adjust the current stock level</p>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div class="relative w-full max-w-md rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+                <!-- Top Accent Line -->
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600"></div>
+
+                <div class="mb-5">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Make Stock Adjustment</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Log stock refill, removal, or manual correction</p>
                 </div>
 
                 <form wire:submit="makeAdjustment" class="space-y-4">
                     <div>
                         <flux:select wire:model="adjustment_type" label="Adjustment Type" required>
-                            <option value="addition">Add Stock</option>
+                            <option value="addition">Add Stock (Refill)</option>
                             <option value="subtraction">Remove Stock</option>
                             <option value="loss">Stock Loss</option>
-                            <option value="correction">Stock Correction</option>
+                            <option value="correction">Set Exact Stock</option>
                         </flux:select>
                     </div>
 
@@ -344,10 +371,10 @@ new #[Layout('components.layouts.app')] class extends Component {
                             step="0.01"
                             min="0.01"
                             required
-                            placeholder="Enter quantity"
+                            placeholder="e.g. 500"
                         />
                         @error('adjustment_quantity')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -357,10 +384,10 @@ new #[Layout('components.layouts.app')] class extends Component {
                             label="Reason"
                             type="text"
                             required
-                            placeholder="Reason for adjustment"
+                            placeholder="e.g. Depot Refill Batch #42"
                         />
                         @error('adjustment_reason')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -368,28 +395,28 @@ new #[Layout('components.layouts.app')] class extends Component {
                         <flux:textarea
                             wire:model="adjustment_notes"
                             label="Notes (Optional)"
-                            placeholder="Additional notes"
-                            rows="3"
+                            placeholder="Additional details..."
+                            rows="2"
                         />
                         @error('adjustment_notes')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
                     @error('general')
-                        <div class="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
-                            <p class="text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        <div class="rounded-2xl border border-red-500/30 bg-red-500/10 p-3">
+                            <p class="text-xs font-medium text-red-600 dark:text-red-400">{{ $message }}</p>
                         </div>
                     @enderror
 
-                    <div class="flex gap-3">
-                        <flux:button type="submit" variant="primary" class="flex-1" wire:loading.attr="disabled">
-                            <span wire:loading.remove>Make Adjustment</span>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-2.5 text-sm transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer" wire:loading.attr="disabled">
+                            <span wire:loading.remove>Save Adjustment</span>
                             <span wire:loading>Processing...</span>
-                        </flux:button>
-                        <flux:button type="button" wire:click="closeAdjustmentModal" variant="outline" class="flex-1">
+                        </button>
+                        <button type="button" wire:click="closeAdjustmentModal" class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm font-medium cursor-pointer">
                             Cancel
-                        </flux:button>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -398,11 +425,14 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     <!-- Settings Modal -->
     @if($showSettingsModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="w-full max-w-md rounded-xl bg-white p-6 dark:bg-gray-800">
-                <div class="mb-4">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Inventory Settings</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Update pricing and stock alerts</p>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div class="relative w-full max-w-md rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+                <!-- Top Accent Line -->
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600"></div>
+
+                <div class="mb-5">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Inventory Settings</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Update retail price per kg & low stock warning threshold</p>
                 </div>
 
                 <form wire:submit="updateSettings" class="space-y-4">
@@ -414,10 +444,10 @@ new #[Layout('components.layouts.app')] class extends Component {
                             step="0.01"
                             min="0.01"
                             required
-                            placeholder="Enter price per kg"
+                            placeholder="e.g. 1200.00"
                         />
                         @error('new_price_per_kg')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -429,45 +459,46 @@ new #[Layout('components.layouts.app')] class extends Component {
                             step="0.01"
                             min="0.01"
                             required
-                            placeholder="Enter minimum stock level"
+                            placeholder="e.g. 1000.00"
                         />
                         @error('new_minimum_stock')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
                     @error('general')
-                        <div class="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
-                            <p class="text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        <div class="rounded-2xl border border-red-500/30 bg-red-500/10 p-3">
+                            <p class="text-xs font-medium text-red-600 dark:text-red-400">{{ $message }}</p>
                         </div>
                     @enderror
 
-                    <div class="flex gap-3">
-                        <flux:button type="submit" variant="primary" class="flex-1" wire:loading.attr="disabled">
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-2.5 text-sm transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer" wire:loading.attr="disabled">
                             <span wire:loading.remove>Update Settings</span>
-                            <span wire:loading>Processing...</span>
-                        </flux:button>
-                        <flux:button type="button" wire:click="closeSettingsModal" variant="outline" class="flex-1">
+                            <span wire:loading>Saving...</span>
+                        </button>
+                        <button type="button" wire:click="closeSettingsModal" class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm font-medium cursor-pointer">
                             Cancel
-                        </flux:button>
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     @endif
-    <!-- Flash Message -->
+
+    <!-- Flash Messages -->
     @if (session()->has('error'))
         <div class="fixed bottom-4 right-4 z-50">
-        <x-alert variant="error" :timeout="5000">
-            {{ session('error') }}
-        </x-alert>
-    </div>
+            <x-alert variant="error" :timeout="5000">
+                {{ session('error') }}
+            </x-alert>
+        </div>
     @endif
     @if (session()->has('success'))
         <div class="fixed bottom-4 right-4 z-50">
-        <x-alert variant="success" :timeout="5000">
-            {{ session('success') }}
-        </x-alert>
-    </div>
+            <x-alert variant="success" :timeout="5000">
+                {{ session('success') }}
+            </x-alert>
+        </div>
     @endif
 </div>

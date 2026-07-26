@@ -72,25 +72,25 @@ new class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
-        <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
+    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your account display name and registered email address')">
+        <form wire:submit="updateProfileInformation" class="my-4 w-full space-y-6">
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
                 <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
-                    <div>
-                        <flux:text class="mt-4">
+                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! auth()->user()->hasVerifiedEmail())
+                    <div class="mt-4 p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10">
+                        <flux:text class="text-xs text-amber-700 dark:text-amber-300">
                             {{ __('Your email address is unverified.') }}
 
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
+                            <flux:link class="text-xs font-semibold underline cursor-pointer text-amber-800 dark:text-amber-200 ml-1" wire:click.prevent="resendVerificationNotification">
                                 {{ __('Click here to re-send the verification email.') }}
                             </flux:link>
                         </flux:text>
 
                         @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
+                            <flux:text class="mt-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                 {{ __('A new verification link has been sent to your email address.') }}
                             </flux:text>
                         @endif
@@ -98,17 +98,20 @@ new class extends Component {
                 @endif
             </div>
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full">{{ __('Save') }}</flux:button>
-                </div>
+            <div class="flex items-center gap-4 pt-2">
+                <button type="submit" class="rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 px-6 py-2.5 text-xs font-semibold text-white transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer">
+                    {{ __('Save Changes') }}
+                </button>
 
-                <x-action-message class="me-3" on="profile-updated">
+                <x-action-message class="text-xs font-semibold text-emerald-600 dark:text-emerald-400" on="profile-updated">
                     {{ __('Saved.') }}
                 </x-action-message>
             </div>
         </form>
 
-        <livewire:settings.delete-user-form />
+        <div class="mt-10 pt-8 border-t border-slate-200/80 dark:border-slate-800/80">
+            <livewire:settings.delete-user-form />
+        </div>
     </x-settings.layout>
 </section>
+

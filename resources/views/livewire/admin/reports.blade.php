@@ -393,38 +393,48 @@ new #[Layout('components.layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="flex h-full w-full flex-1 flex-col gap-6 p-6">
+<div class="flex h-full w-full flex-1 flex-col gap-6 p-4 sm:p-6 md:p-8">
     <!-- Header -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex-1">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Reports & Analytics</h1>
-            <p class="text-gray-600 dark:text-gray-400">Generate comprehensive business reports</p>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                    <span class="h-2 w-2 rounded-full bg-orange-500 dark:bg-orange-400 animate-pulse"></span>
+                    Business Intelligence
+                </span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Reports & Analytics</h1>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Generate, analyze, and export sales, inventory, and cashier reports</p>
         </div>
-        <div class="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:flex-shrink-0">
-            <flux:button wire:click="generateReport" variant="outline" class="w-full sm:w-auto">
+        <div class="flex items-center gap-3">
+            <button wire:click="generateReport" class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/80 dark:bg-slate-800/80 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all shadow-sm cursor-pointer flex items-center gap-2">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 Refresh Data
-            </flux:button>
-            <flux:button wire:click="exportReport" variant="primary" class="w-full sm:w-auto">
+            </button>
+            <button wire:click="exportReport" class="rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 px-4 py-2.5 text-xs font-semibold text-white transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 Export Report
-            </flux:button>
+            </button>
         </div>
     </div>
 
-    <!-- Report Controls -->
-    <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <!-- Report Controls Card -->
+    <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl overflow-hidden transition-all duration-200">
+        <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600"></div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
             <!-- Report Type -->
             <div>
-                <flux:select wire:model.live="reportType" label="Report Type">
-                    <option value="sales">Sales Report</option>
-                    <option value="inventory">Inventory Report</option>
+                <flux:select wire:model.live="reportType" label="Report Category">
+                    <option value="sales">Sales Analytics</option>
+                    <option value="inventory">Inventory Metrics</option>
                     <option value="cashier">Cashier Performance</option>
                 </flux:select>
             </div>
 
             <!-- Date Range -->
             <div>
-                <flux:select wire:model.live="dateRange" label="Date Range">
+                <flux:select wire:model.live="dateRange" label="Period">
                     <option value="today">Today</option>
                     <option value="yesterday">Yesterday</option>
                     <option value="this_week">This Week</option>
@@ -435,7 +445,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </flux:select>
             </div>
 
-            <!-- Custom Date Range -->
+            <!-- Custom Date Range or Cashier Filter -->
             @if($dateRange === 'custom')
                 <div class="grid grid-cols-2 gap-2">
                     <flux:input
@@ -461,9 +471,9 @@ new #[Layout('components.layouts.app')] class extends Component {
             @endif
 
             <!-- Date Display -->
-            <div class="flex items-end">
-                <div class="text-sm text-gray-600 dark:text-gray-400">
-                    <div>Period: {{ Carbon::parse($startDate)->format('M d, Y') }} - {{ Carbon::parse($endDate)->format('M d, Y') }}</div>
+            <div>
+                <div class="rounded-xl bg-slate-100/80 dark:bg-slate-800/60 p-2.5 border border-slate-200/80 dark:border-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-300 text-center">
+                    {{ Carbon::parse($startDate)->format('M d, Y') }} &rarr; {{ Carbon::parse($endDate)->format('M d, Y') }}
                 </div>
             </div>
         </div>
@@ -472,115 +482,123 @@ new #[Layout('components.layouts.app')] class extends Component {
     @if($reportType === 'sales')
         <!-- Sales Report -->
         <div class="space-y-6">
-            <!-- Sales Summary Cards -->
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900">
-                                <svg class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                </svg>
-                            </div>
+            <!-- Sales Summary KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <!-- Total Revenue -->
+                <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Sales</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">₦{{ number_format($this->salesData['total_sales'], 2) }}</p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Sales</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">₦{{ number_format($this->salesData['total_sales'], 2) }}</p>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                        <span>Period completed sales</span>
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
-                                <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                </svg>
-                            </div>
+                <!-- Total Volume -->
+                <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Quantity</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ number_format($this->salesData['total_quantity'], 2) }} <span class="text-sm font-normal text-slate-500 dark:text-slate-400">kg</span></p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Quantity</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($this->salesData['total_quantity'], 2) }} kg</p>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                        <span>LPG volume dispensed</span>
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900">
-                                <svg class="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                            </div>
+                <!-- Total Orders -->
+                <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Transactions</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ $this->salesData['total_transactions'] }}</p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Transactions</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $this->salesData['total_transactions'] }}</p>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                        <span>Total order tickets</span>
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900">
-                                <svg class="h-5 w-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                </svg>
-                            </div>
+                <!-- Average Sale -->
+                <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Avg. Transaction</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">₦{{ number_format($this->salesData['average_transaction'], 2) }}</p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Avg. Transaction</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">₦{{ number_format($this->salesData['average_transaction'], 2) }}</p>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
+                        <span>Average ticket value</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Transaction Status Breakdown -->
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Transaction Status</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Completed:</span>
-                            <span class="font-medium text-green-600 dark:text-green-400">{{ $this->salesData['completed_transactions'] }}</span>
+            <!-- Transaction Status & Payment Method Breakdown Cards -->
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl overflow-hidden">
+                    <h3 class="mb-4 text-base font-bold text-slate-900 dark:text-white tracking-tight">Transaction Status</h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                            <span class="text-slate-600 dark:text-slate-400">Completed:</span>
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $this->salesData['completed_transactions'] }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Cancelled:</span>
-                            <span class="font-medium text-red-600 dark:text-red-400">{{ $this->salesData['cancelled_transactions'] }}</span>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                            <span class="text-slate-600 dark:text-slate-400">Cancelled:</span>
+                            <span class="font-bold text-red-600 dark:text-red-400">{{ $this->salesData['cancelled_transactions'] }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Refunded:</span>
-                            <span class="font-medium text-yellow-600 dark:text-yellow-400">{{ $this->salesData['refunded_transactions'] }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Payment Methods</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Cash:</span>
-                            <span class="font-medium text-green-600 dark:text-green-400">{{ $this->salesData['cash_payments'] }} (₦{{ number_format($this->salesData['cash_amount'], 2) }})</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Card:</span>
-                            <span class="font-medium text-blue-600 dark:text-blue-400">{{ $this->salesData['card_payments'] }} (₦{{ number_format($this->salesData['card_amount'], 2) }})</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-400">Transfer:</span>
-                            <span class="font-medium text-purple-600 dark:text-purple-400">{{ $this->salesData['transfer_payments'] }} (₦{{ number_format($this->salesData['transfer_amount'], 2) }})</span>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-slate-600 dark:text-slate-400">Refunded:</span>
+                            <span class="font-bold text-amber-600 dark:text-amber-400">{{ $this->salesData['refunded_transactions'] }}</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Daily Sales Chart -->
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800 md:col-span-2">
-                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Daily Sales Trend</h3>
-                    <div class="h-64">
+                <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl overflow-hidden">
+                    <h3 class="mb-4 text-base font-bold text-slate-900 dark:text-white tracking-tight">Payment Methods</h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center py-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                            <span class="text-slate-600 dark:text-slate-400">Cash:</span>
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ $this->salesData['cash_payments'] }} (₦{{ number_format($this->salesData['cash_amount'], 2) }})</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-200/60 dark:border-slate-800/60">
+                            <span class="text-slate-600 dark:text-slate-400">Card:</span>
+                            <span class="font-bold text-blue-600 dark:text-blue-400">{{ $this->salesData['card_payments'] }} (₦{{ number_format($this->salesData['card_amount'], 2) }})</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-slate-600 dark:text-slate-400">Transfer:</span>
+                            <span class="font-bold text-purple-600 dark:text-purple-400">{{ $this->salesData['transfer_payments'] }} (₦{{ number_format($this->salesData['transfer_amount'], 2) }})</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Sales Chart Card -->
+                <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl overflow-hidden lg:col-span-1">
+                    <h3 class="mb-4 text-base font-bold text-slate-900 dark:text-white tracking-tight">Daily Sales Trend</h3>
+                    <div class="h-52">
                         <canvas id="dailySalesChart" wire:ignore></canvas>
                     </div>
                 </div>
@@ -591,98 +609,86 @@ new #[Layout('components.layouts.app')] class extends Component {
     @if($reportType === 'inventory')
         <!-- Inventory Report -->
         <div class="space-y-6">
-            <!-- Inventory Summary -->
-            <div class="grid grid-cols-1 gap-6 md:grid-cols-4">
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
-                                <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                </svg>
-                            </div>
+            <!-- Inventory Summary Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <!-- Current Stock -->
+                <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Current Stock</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ number_format($this->inventoryData['current_stock'], 2) }} <span class="text-sm font-normal text-slate-500 dark:text-slate-400">kg</span></p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Current Stock</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($this->inventoryData['current_stock'], 2) }} kg</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900">
-                                <svg class="h-5 w-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Stock Value</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">₦{{ number_format($this->inventoryData['stock_value'], 2) }}</p>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900">
-                                <svg class="h-5 w-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                </svg>
-                            </div>
+                <!-- Stock Value -->
+                <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Stock Value</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">₦{{ number_format($this->inventoryData['stock_value'], 2) }}</p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Minimum Stock</p>
-                            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($this->inventoryData['minimum_stock'], 2) }} kg</p>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-lg {{ $this->inventoryData['is_low_stock'] ? 'bg-red-100 dark:bg-red-900' : 'bg-green-100 dark:bg-green-900' }}">
-                                <svg class="h-5 w-5 {{ $this->inventoryData['is_low_stock'] ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
+                <!-- Minimum Stock -->
+                <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Minimum Stock</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{{ number_format($this->inventoryData['minimum_stock'], 2) }} <span class="text-sm font-normal text-slate-500 dark:text-slate-400">kg</span></p>
                         </div>
-                        <div class="ml-4">
-                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Status</p>
-                            <p class="text-2xl font-bold {{ $this->inventoryData['is_low_stock'] ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }}">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600 text-white shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="relative rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-5 sm:p-6 backdrop-blur-xl shadow-lg dark:shadow-xl hover:border-orange-500/40 transition-all duration-300 group overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="space-y-1">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold {{ $this->inventoryData['is_low_stock'] ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' }} tracking-tight">
                                 {{ $this->inventoryData['is_low_stock'] ? 'Low Stock' : 'Good' }}
                             </p>
                         </div>
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $this->inventoryData['is_low_stock'] ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-red-500/20' : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20' }} text-white shadow-lg group-hover:scale-110 transition-transform">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Stock Level Progress -->
-            <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Stock Level Overview</h3>
-                <div class="space-y-4">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600 dark:text-gray-400">Current Stock: {{ number_format($this->inventoryData['current_stock'], 2) }} kg</span>
-                        <span class="text-gray-600 dark:text-gray-400">Minimum Required: {{ number_format($this->inventoryData['minimum_stock'], 2) }} kg</span>
+            <!-- Stock Level Progress Card -->
+            <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl overflow-hidden">
+                <h3 class="mb-3 text-lg font-bold text-slate-900 dark:text-white tracking-tight">Stock Level Capacity Overview</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between text-xs font-semibold text-slate-600 dark:text-slate-400">
+                        <span>Current: <strong class="text-slate-900 dark:text-white">{{ number_format($this->inventoryData['current_stock'], 2) }} kg</strong></span>
+                        <span>Minimum Required: <strong class="text-slate-900 dark:text-white">{{ number_format($this->inventoryData['minimum_stock'], 2) }} kg</strong></span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700">
-                        <div class="bg-blue-600 h-3 rounded-full {{ $this->inventoryData['is_low_stock'] ? 'bg-red-600' : '' }}" 
+                    <div class="w-full bg-slate-200/80 dark:bg-slate-800/80 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200 dark:border-slate-700/50">
+                        <div class="h-full rounded-full transition-all duration-500 {{ $this->inventoryData['is_low_stock'] ? 'bg-gradient-to-r from-red-500 to-rose-600' : 'bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500' }}" 
                              style="width: {{ min(100, $this->inventoryData['stock_percentage']) }}%"></div>
                     </div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ number_format($this->inventoryData['stock_percentage'], 1) }}% of minimum stock level
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                        Operating at <strong class="text-slate-800 dark:text-slate-200">{{ number_format($this->inventoryData['stock_percentage'], 1) }}%</strong> of minimum stock level
                     </div>
-                </div>
-            </div>
-
-            <!-- Inventory Chart -->
-            <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Stock Level Chart</h3>
-                <div class="h-64">
-                    <canvas id="inventoryChart" wire:ignore></canvas>
                 </div>
             </div>
         </div>
@@ -691,50 +697,44 @@ new #[Layout('components.layouts.app')] class extends Component {
     @if($reportType === 'cashier')
         <!-- Cashier Performance Report -->
         <div class="space-y-6">
-            <!-- Cashier Performance Chart -->
-            <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-white">Cashier Performance Chart</h3>
-                <div class="h-64">
-                    <canvas id="cashierChart" wire:ignore></canvas>
+            <!-- Cashier Performance Table Card -->
+            <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl shadow-xl dark:shadow-2xl overflow-hidden">
+                <div class="border-b border-slate-200/80 dark:border-slate-800/80 px-6 py-5 bg-slate-50/60 dark:bg-slate-950/40">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Cashier Performance Ledger</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Sales revenue and quantity volume breakdown per cashier</p>
                 </div>
-            </div>
 
-            <!-- Cashier Performance Table -->
-            <div class="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Cashier Performance</h3>
-                </div>
-                <div class="p-6">
+                <div class="p-0">
                     @if($this->cashierPerformance->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <div class="overflow-x-auto w-full">
+                            <table class="w-full text-left border-collapse">
                                 <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Cashier</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Total Sales</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Quantity Sold</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Transactions</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Avg. Transaction</th>
+                                    <tr class="border-b border-slate-200/80 dark:border-slate-800/60 bg-slate-100/40 dark:bg-slate-950/20 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                        <th class="px-6 py-4">Cashier</th>
+                                        <th class="px-6 py-4">Total Sales</th>
+                                        <th class="px-6 py-4">Quantity Sold</th>
+                                        <th class="px-6 py-4">Transactions</th>
+                                        <th class="px-6 py-4">Avg. Transaction</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                                <tbody class="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-sm">
                                     @foreach($this->cashierPerformance as $cashier)
-                                        <tr>
+                                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                             <td class="whitespace-nowrap px-6 py-4">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $cashier['name'] }}</div>
-                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $cashier['email'] }}</div>
+                                                <div class="font-bold text-slate-900 dark:text-white">{{ $cashier['name'] }}</div>
+                                                <div class="text-xs text-slate-500 dark:text-slate-400">{{ $cashier['email'] }}</div>
                                             </td>
                                             <td class="whitespace-nowrap px-6 py-4">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-white">₦{{ number_format($cashier['total_sales'], 2) }}</div>
+                                                <div class="font-extrabold text-emerald-600 dark:text-emerald-400">₦{{ number_format($cashier['total_sales'], 2) }}</div>
                                             </td>
                                             <td class="whitespace-nowrap px-6 py-4">
-                                                <div class="text-sm text-gray-900 dark:text-white">{{ number_format($cashier['total_quantity'], 2) }} kg</div>
+                                                <div class="font-semibold text-slate-900 dark:text-white">{{ number_format($cashier['total_quantity'], 2) }} kg</div>
                                             </td>
                                             <td class="whitespace-nowrap px-6 py-4">
-                                                <div class="text-sm text-gray-900 dark:text-white">{{ $cashier['transactions'] }}</div>
+                                                <div class="font-medium text-slate-900 dark:text-white">{{ $cashier['transactions'] }}</div>
                                             </td>
                                             <td class="whitespace-nowrap px-6 py-4">
-                                                <div class="text-sm text-gray-900 dark:text-white">₦{{ number_format($cashier['average_transaction'], 2) }}</div>
+                                                <div class="font-semibold text-slate-800 dark:text-slate-200">₦{{ number_format($cashier['average_transaction'], 2) }}</div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -742,32 +742,35 @@ new #[Layout('components.layouts.app')] class extends Component {
                             </table>
                         </div>
                     @else
-                        <div class="text-center py-8">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No cashier data</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No transactions found for the selected period.</p>
+                        <div class="text-center py-12 px-4">
+                            <div class="mx-auto h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-center text-slate-400 mb-3">
+                                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-base font-semibold text-slate-900 dark:text-white">No cashier data recorded</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Cashier performance metrics for this period will appear here.</p>
                         </div>
                     @endif
                 </div>
             </div>
         </div>
     @endif
-    <!-- Flash Message -->
+
+    <!-- Flash Messages -->
     @if (session()->has('error'))
         <div class="fixed bottom-4 right-4 z-50">
-        <x-alert variant="error" :timeout="5000">
-            {{ session('error') }}
-        </x-alert>
-    </div>
+            <x-alert variant="error" :timeout="5000">
+                {{ session('error') }}
+            </x-alert>
+        </div>
     @endif
     @if (session()->has('success'))
         <div class="fixed bottom-4 right-4 z-50">
-        <x-alert variant="success" :timeout="5000">
-            {{ session('success') }}
-        </x-alert>
-    </div>
+            <x-alert variant="success" :timeout="5000">
+                {{ session('success') }}
+            </x-alert>
+        </div>
     @endif
 </div>
 
@@ -780,19 +783,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let inventoryChart = null;
     let cashierChart = null;
 
-    // Function to initialize Daily Sales Chart
     function initDailySalesChart() {
         const ctx = document.getElementById('dailySalesChart');
         if (!ctx) return;
-
-        if (dailySalesChart) {
-            dailySalesChart.destroy();
-        }
+        if (dailySalesChart) dailySalesChart.destroy();
 
         const dailyData = @json($this->dailySales);
         const labels = dailyData.map(item => item.date);
         const salesData = dailyData.map(item => item.sales);
-        const quantityData = dailyData.map(item => item.quantity);
 
         dailySalesChart = new Chart(ctx, {
             type: 'line',
@@ -801,216 +799,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 datasets: [{
                     label: 'Sales (₦)',
                     data: salesData,
-                    borderColor: 'rgb(59, 130, 246)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: '#f97316',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
                     tension: 0.4,
-                    yAxisID: 'y'
-                }, {
-                    label: 'Quantity (kg)',
-                    data: quantityData,
-                    borderColor: 'rgb(34, 197, 94)',
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    tension: 0.4,
-                    yAxisID: 'y1'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
+                plugins: { legend: { display: false } },
                 scales: {
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    },
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Sales (₦)'
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Quantity (kg)'
-                        },
-                        grid: {
-                            drawOnChartArea: false,
-                        },
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
+                    x: { grid: { display: false } },
+                    y: { grid: { color: 'rgba(148, 163, 184, 0.1)' } }
                 }
             }
         });
     }
 
-    // Function to initialize Inventory Chart
-    function initInventoryChart() {
-        const ctx = document.getElementById('inventoryChart');
-        if (!ctx) return;
-
-        if (inventoryChart) {
-            inventoryChart.destroy();
-        }
-
-        const inventoryData = @json($this->inventoryData);
-        const currentStock = inventoryData.current_stock || 0;
-        const minimumStock = inventoryData.minimum_stock || 0;
-        const stockValue = inventoryData.stock_value || 0;
-
-        inventoryChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Current Stock', 'Minimum Required', 'Available Above Minimum'],
-                datasets: [{
-                    data: [currentStock, minimumStock, Math.max(0, currentStock - minimumStock)],
-                    backgroundColor: [
-                        'rgb(59, 130, 246)',
-                        'rgb(239, 68, 68)',
-                        'rgb(34, 197, 94)'
-                    ],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.parsed;
-                                return label + ': ' + value.toFixed(2) + ' kg';
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Function to initialize Cashier Performance Chart
-    function initCashierChart() {
-        const ctx = document.getElementById('cashierChart');
-        if (!ctx) return;
-
-        if (cashierChart) {
-            cashierChart.destroy();
-        }
-
-        const cashierData = @json($this->cashierPerformance);
-        const labels = cashierData.map(item => item.name);
-        const salesData = cashierData.map(item => item.total_sales);
-        const transactionData = cashierData.map(item => item.transactions);
-
-        cashierChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Total Sales (₦)',
-                    data: salesData,
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                    borderColor: 'rgb(59, 130, 246)',
-                    borderWidth: 1,
-                    yAxisID: 'y'
-                }, {
-                    label: 'Transactions',
-                    data: transactionData,
-                    backgroundColor: 'rgba(34, 197, 94, 0.8)',
-                    borderColor: 'rgb(34, 197, 94)',
-                    borderWidth: 1,
-                    yAxisID: 'y1'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Cashier'
-                        }
-                    },
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Sales (₦)'
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Transactions'
-                        },
-                        grid: {
-                            drawOnChartArea: false,
-                        },
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                }
-            }
-        });
-    }
-
-    // Initialize charts based on current report type
     const currentReportType = '{{ $reportType }}';
-    
     if (currentReportType === 'sales') {
         initDailySalesChart();
-    } else if (currentReportType === 'inventory') {
-        initInventoryChart();
-    } else if (currentReportType === 'cashier') {
-        initCashierChart();
     }
 
-    // Listen for Livewire events to reinitialize charts when data changes
     window.addEventListener('livewire:updated', function() {
         setTimeout(() => {
-            const newReportType = document.querySelector('[wire\\:model\\.live="reportType"]')?.value || '{{ $reportType }}';
-            
-            if (newReportType === 'sales') {
-                initDailySalesChart();
-            } else if (newReportType === 'inventory') {
-                initInventoryChart();
-            } else if (newReportType === 'cashier') {
-                initCashierChart();
-            }
+            initDailySalesChart();
         }, 100);
     });
 });

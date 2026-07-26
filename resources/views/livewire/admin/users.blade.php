@@ -212,33 +212,43 @@ new #[Layout('components.layouts.app')] class extends Component {
     }
 }; ?>
 
-<div class="flex h-full w-full flex-1 flex-col gap-6 p-6">
+<div class="flex h-full w-full flex-1 flex-col gap-6 p-4 sm:p-6 md:p-8">
     <!-- Header -->
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div class="flex-1">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
-            <p class="text-gray-600 dark:text-gray-400">Manage cashier accounts and permissions</p>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20">
+                    <span class="h-2 w-2 rounded-full bg-orange-500 dark:bg-orange-400 animate-pulse"></span>
+                    Access Control
+                </span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">User Management</h1>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Manage admin and cashier system access, status, and credentials</p>
         </div>
-        <div class="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:flex-shrink-0">
-            <flux:button wire:click="clearFilters" variant="outline" class="w-full sm:w-auto">
+        <div class="flex items-center gap-3">
+            <button wire:click="clearFilters" class="rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white/80 dark:bg-slate-800/80 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all shadow-sm cursor-pointer">
                 Clear Filters
-            </flux:button>
-            <flux:button wire:click="openCreateModal" variant="primary" class="w-full sm:w-auto">
-                Add User
-            </flux:button>
+            </button>
+            <button wire:click="openCreateModal" class="rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 px-4 py-2.5 text-xs font-semibold text-white transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add User Account
+            </button>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+    <!-- Filters Bar Card -->
+    <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 p-6 backdrop-blur-xl shadow-xl overflow-hidden transition-all duration-200">
+        <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600"></div>
+
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
             <!-- Search -->
             <div>
                 <flux:input
                     wire:model.live.debounce.300ms="search"
                     label="Search"
-                    placeholder="Search users..."
+                    placeholder="Search name or email..."
                     icon="magnifying-glass"
+                    class="w-full"
                 />
             </div>
 
@@ -266,92 +276,90 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </flux:select>
             </div>
 
-            <!-- User Count -->
-            <div class="flex items-end">
-                <div class="text-sm text-gray-600 dark:text-gray-400">
-                    <div>Total Users: {{ $this->users->total() }}</div>
+            <!-- User Counter -->
+            <div>
+                <div class="rounded-xl bg-slate-100/80 dark:bg-slate-800/60 p-2.5 border border-slate-200/80 dark:border-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-300 text-center">
+                    Total Registered Accounts: <strong class="text-orange-600 dark:text-orange-400">{{ $this->users->total() }}</strong>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Users Table -->
-    <div class="rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-        <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-700">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Users</h3>
+    <!-- Users Table Card -->
+    <div class="relative rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl shadow-xl dark:shadow-2xl overflow-hidden">
+        <div class="border-b border-slate-200/80 dark:border-slate-800/80 px-6 py-5 bg-slate-50/60 dark:bg-slate-950/40">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white tracking-tight">System User Directory</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">List of active administrators and point-of-sale cashiers</p>
         </div>
-        <div class="p-6">
+
+        <div class="p-0">
             @if($this->users->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">User</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Role</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Created</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
+                            <tr class="border-b border-slate-200/80 dark:border-slate-800/60 bg-slate-100/40 dark:bg-slate-950/20 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                <th class="px-6 py-4">User Details</th>
+                                <th class="px-6 py-4">Role</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Registered Date</th>
+                                <th class="px-6 py-4 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                        <tbody class="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-sm">
                             @foreach($this->users as $user)
-                                <tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                                     <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <div class="h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
-                                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                        {{ $user->initials() }}
-                                                    </span>
-                                                </div>
+                                        <div class="flex items-center gap-3">
+                                            <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-white font-bold text-sm flex items-center justify-center shadow-md shadow-orange-500/20">
+                                                {{ $user->initials() }}
                                             </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $user->name }}</div>
-                                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
+                                            <div>
+                                                <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                    {{ $user->name }}
+                                                    @if($user->id === auth()->id())
+                                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">You</span>
+                                                    @endif
+                                                </div>
+                                                <div class="text-xs text-slate-500 dark:text-slate-400">{{ $user->email }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4">
-                                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                                            {{ $user->role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' }}">
+                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold 
+                                            {{ $user->role === 'admin' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20' }}">
                                             {{ ucfirst($user->role) }}
                                         </span>
                                     </td>
                                     <td class="whitespace-nowrap px-6 py-4">
-                                        <span class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 
-                                            {{ $user->is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' }}">
+                                        <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold 
+                                            {{ $user->is_active ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20' }}">
                                             {{ $user->is_active ? 'Active' : 'Inactive' }}
                                         </span>
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->created_at->format('M d, Y') }}</div>
+                                    <td class="whitespace-nowrap px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
+                                        {{ $user->created_at->format('M d, Y') }}
                                     </td>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="flex gap-2">
-                                            <flux:button 
+                                    <td class="whitespace-nowrap px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button 
                                                 wire:click="openEditModal({{ $user->id }})" 
-                                                variant="outline" 
-                                                size="sm"
+                                                class="rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                                             >
                                                 Edit
-                                            </flux:button>
+                                            </button>
                                             @if($user->id !== auth()->id())
-                                                <flux:button 
+                                                <button 
                                                     wire:click="toggleUserStatus({{ $user->id }})" 
-                                                    variant="outline" 
-                                                    size="sm"
-                                                    class="{{ $user->is_active ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700' }}"
+                                                    class="rounded-xl border px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors {{ $user->is_active ? 'border-red-500/30 text-red-600 hover:bg-red-500/10' : 'border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10' }}"
                                                 >
                                                     {{ $user->is_active ? 'Deactivate' : 'Activate' }}
-                                                </flux:button>
-                                                <flux:button 
+                                                </button>
+                                                <button 
                                                     wire:click="deleteUser({{ $user->id }})" 
-                                                    variant="outline" 
-                                                    size="sm"
-                                                    class="text-red-600 hover:text-red-700"
+                                                    class="rounded-xl border border-red-500/30 text-red-600 hover:bg-red-500/10 px-3 py-1.5 text-xs font-semibold cursor-pointer transition-colors"
                                                 >
                                                     Delete
-                                                </flux:button>
+                                                </button>
                                             @endif
                                         </div>
                                     </td>
@@ -362,16 +370,18 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </div>
 
                 <!-- Pagination -->
-                <div class="mt-6">
+                <div class="p-6 border-t border-slate-200/80 dark:border-slate-800/80">
                     {{ $this->users->links() }}
                 </div>
             @else
-                <div class="text-center py-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria.</p>
+                <div class="text-center py-12 px-4">
+                    <div class="mx-auto h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-center text-slate-400 mb-3">
+                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-base font-semibold text-slate-900 dark:text-white">No users found</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Try adjusting search or role filters.</p>
                 </div>
             @endif
         </div>
@@ -379,11 +389,14 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     <!-- Create User Modal -->
     @if($showCreateModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="w-full max-w-md rounded-xl bg-white p-6 dark:bg-gray-800">
-                <div class="mb-4">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Add New User</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Create a new user account</p>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div class="relative w-full max-w-md rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+                <!-- Top Accent Line -->
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600"></div>
+
+                <div class="mb-5">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Add New User Account</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Create login credentials and assign user role</p>
                 </div>
 
                 <form wire:submit="createUser" class="space-y-4">
@@ -393,10 +406,10 @@ new #[Layout('components.layouts.app')] class extends Component {
                             label="Full Name"
                             type="text"
                             required
-                            placeholder="Enter full name"
+                            placeholder="e.g. John Doe"
                         />
                         @error('name')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -406,10 +419,10 @@ new #[Layout('components.layouts.app')] class extends Component {
                             label="Email Address"
                             type="email"
                             required
-                            placeholder="Enter email address"
+                            placeholder="john@ruxxen.com"
                         />
                         @error('email')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -419,35 +432,35 @@ new #[Layout('components.layouts.app')] class extends Component {
                             label="Password"
                             type="password"
                             required
-                            placeholder="Enter password"
+                            placeholder="••••••••"
                         />
                         @error('password')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
                         <flux:select wire:model="role" label="Role" required>
                             <option value="cashier">Cashier</option>
-                            <option value="admin">Admin</option>
+                            <option value="admin">Administrator</option>
                         </flux:select>
                         @error('role')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="flex items-center">
+                    <div class="flex items-center pt-1">
                         <flux:checkbox wire:model="is_active" label="Active Account" />
                     </div>
 
-                    <div class="flex gap-3">
-                        <flux:button type="submit" variant="primary" class="flex-1" wire:loading.attr="disabled">
-                            <span wire:loading.remove>Create User</span>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-2.5 text-sm transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer" wire:loading.attr="disabled">
+                            <span wire:loading.remove>Create Account</span>
                             <span wire:loading>Creating...</span>
-                        </flux:button>
-                        <flux:button type="button" wire:click="closeCreateModal" variant="outline" class="flex-1">
+                        </button>
+                        <button type="button" wire:click="closeCreateModal" class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm font-medium cursor-pointer">
                             Cancel
-                        </flux:button>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -456,11 +469,14 @@ new #[Layout('components.layouts.app')] class extends Component {
 
     <!-- Edit User Modal -->
     @if($showEditModal && $editingUser)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="w-full max-w-md rounded-xl bg-white p-6 dark:bg-gray-800">
-                <div class="mb-4">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">Edit User</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Update user information</p>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div class="relative w-full max-w-md rounded-3xl border border-slate-200/80 dark:border-slate-800/80 bg-white/95 dark:bg-slate-900/95 p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+                <!-- Top Accent Line -->
+                <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600"></div>
+
+                <div class="mb-5">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">Edit User Account</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Update account credentials or assign role</p>
                 </div>
 
                 <form wire:submit="updateUser" class="space-y-4">
@@ -470,10 +486,10 @@ new #[Layout('components.layouts.app')] class extends Component {
                             label="Full Name"
                             type="text"
                             required
-                            placeholder="Enter full name"
+                            placeholder="e.g. John Doe"
                         />
                         @error('name')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -483,65 +499,67 @@ new #[Layout('components.layouts.app')] class extends Component {
                             label="Email Address"
                             type="email"
                             required
-                            placeholder="Enter email address"
+                            placeholder="john@ruxxen.com"
                         />
                         @error('email')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
                         <flux:input
                             wire:model="password"
-                            label="Password (leave blank to keep current)"
+                            label="New Password (Optional)"
                             type="password"
-                            placeholder="Enter new password"
+                            placeholder="Leave blank to keep existing password"
                         />
                         @error('password')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
                         <flux:select wire:model="role" label="Role" required>
                             <option value="cashier">Cashier</option>
-                            <option value="admin">Admin</option>
+                            <option value="admin">Administrator</option>
                         </flux:select>
                         @error('role')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="flex items-center">
+                    <div class="flex items-center pt-1">
                         <flux:checkbox wire:model="is_active" label="Active Account" />
                     </div>
 
-                    <div class="flex gap-3">
-                        <flux:button type="submit" variant="primary" class="flex-1" wire:loading.attr="disabled">
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 text-white font-semibold py-2.5 text-sm transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer" wire:loading.attr="disabled">
                             <span wire:loading.remove>Update User</span>
-                            <span wire:loading>Updating...</span>
-                        </flux:button>
-                        <flux:button type="button" wire:click="closeEditModal" variant="outline" class="flex-1">
+                            <span wire:loading>Saving...</span>
+                        </button>
+                        <button type="button" wire:click="closeEditModal" class="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-sm font-medium cursor-pointer">
                             Cancel
-                        </flux:button>
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     @endif
-    <!-- Flash Message -->
+
+    <!-- Flash Messages -->
     @if (session()->has('error'))
         <div class="fixed bottom-4 right-4 z-50">
-        <x-alert variant="error" :timeout="5000">
-            {{ session('error') }}
-        </x-alert>
-    </div>
+            <x-alert variant="error" :timeout="5000">
+                {{ session('error') }}
+            </x-alert>
+        </div>
     @endif
     @if (session()->has('success'))
         <div class="fixed bottom-4 right-4 z-50">
-        <x-alert variant="success" :timeout="5000">
-            {{ session('success') }}
-        </x-alert>
-    </div>
+            <x-alert variant="success" :timeout="5000">
+                {{ session('success') }}
+            </x-alert>
+        </div>
     @endif
 </div>
+

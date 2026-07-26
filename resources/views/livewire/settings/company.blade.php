@@ -192,27 +192,35 @@ new class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Company Settings')" :subheading="__('Manage company information and email configuration')">
-        <!-- General Settings -->
-        <div class="space-y-6">
-            <div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">General Settings</h3>
+    <x-settings.layout :heading="__('Company Settings')" :subheading="__('Manage business details, logo branding, and SMTP email server credentials')">
+        <div class="space-y-8 my-4">
+            <!-- General Settings -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-2">
+                    <div class="h-8 w-8 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">Business Details</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Appears on printed receipts and customer invoices</p>
+                    </div>
+                </div>
                 
-                <form wire:submit="updateGeneralSettings" class="space-y-4">
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <form wire:submit="updateGeneralSettings" class="space-y-4 pt-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <flux:input
                             wire:model="company_name"
                             label="Company Name"
                             type="text"
                             required
-                            placeholder="Enter company name"
+                            placeholder="e.g. Ruxxen LPG Depot"
                         />
 
                         <flux:input
                             wire:model="company_email"
                             label="Company Email"
                             type="email"
-                            placeholder="Enter company email"
+                            placeholder="info@ruxxen.com"
                         />
                     </div>
 
@@ -220,92 +228,100 @@ new class extends Component {
                         wire:model="company_phone"
                         label="Company Phone"
                         type="text"
-                        placeholder="Enter company phone number"
+                        placeholder="+234 800 000 0000"
                     />
 
                     <flux:textarea
                         wire:model="company_address"
                         label="Company Address"
-                        placeholder="Enter company address"
-                        rows="3"
+                        placeholder="Enter full physical depot address"
+                        rows="2"
                     />
 
-                    <!-- Logo Upload -->
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Company Logo
-                            </label>
-                            
-                            @if($settings->logo_url)
-                                <div class="flex items-center space-x-4 mb-4">
-                                    <img src="{{ $settings->logo_url }}" alt="Company Logo" class="h-16 w-16 object-contain border rounded-lg">
-                                    <flux:button type="button" wire:click="removeLogo" variant="outline" size="sm">
+                    <!-- Logo Upload Section -->
+                    <div class="rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-950/40 p-4 space-y-3">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                            Company Branding Logo
+                        </label>
+                        
+                        @if($settings->logo_url)
+                            <div class="flex items-center gap-4 p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <img src="{{ $settings->logo_url }}" alt="Company Logo" class="h-14 w-14 object-contain rounded-lg">
+                                <div>
+                                    <p class="text-xs font-medium text-slate-900 dark:text-white">Current Active Logo</p>
+                                    <button type="button" wire:click="removeLogo" class="mt-1 text-xs font-semibold text-red-600 dark:text-red-400 hover:underline cursor-pointer">
                                         Remove Logo
-                                    </flux:button>
+                                    </button>
                                 </div>
-                            @endif
+                            </div>
+                        @endif
 
-                            <flux:input
-                                wire:model="logo"
-                                type="file"
-                                accept="image/*"
-                                placeholder="Upload company logo"
-                            />
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Maximum file size: 2MB. Supported formats: JPG, PNG, GIF
-                            </p>
-                        </div>
+                        <flux:input
+                            wire:model="logo"
+                            type="file"
+                            accept="image/*"
+                        />
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Recommended format: PNG or JPG (Max 2MB)
+                        </p>
                     </div>
 
-                    <div class="flex justify-end">
-                        <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
-                            <span wire:loading.remove>Update General Settings</span>
-                            <span wire:loading>Updating...</span>
-                        </flux:button>
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 px-6 py-2.5 text-xs font-semibold text-white transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer" wire:loading.attr="disabled">
+                            <span wire:loading.remove>Update Business Details</span>
+                            <span wire:loading>Saving...</span>
+                        </button>
                     </div>
                 </form>
             </div>
 
             <!-- SMTP Settings -->
-            <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">SMTP/Email Settings</h3>
+            <div class="pt-8 border-t border-slate-200/80 dark:border-slate-800/80 space-y-4">
+                <div class="flex items-center gap-2">
+                    <div class="h-8 w-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">SMTP Mail Server</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Configure outbound email credentials for receipt dispatches</p>
+                    </div>
+                </div>
                 
-                <form wire:submit="updateSmtpSettings" class="space-y-4">
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <form wire:submit="updateSmtpSettings" class="space-y-4 pt-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <flux:input
                             wire:model="smtp_host"
                             label="SMTP Host"
                             type="text"
-                            placeholder="e.g., smtp.gmail.com"
+                            placeholder="e.g. smtp.mailgun.org"
                         />
 
                         <flux:input
                             wire:model="smtp_port"
                             label="SMTP Port"
                             type="number"
-                            placeholder="e.g., 587"
+                            placeholder="587"
                         />
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <flux:input
                             wire:model="smtp_username"
                             label="SMTP Username"
                             type="text"
-                            placeholder="Enter SMTP username"
+                            placeholder="postmaster@ruxxen.com"
                         />
 
                         <flux:input
                             wire:model="smtp_password"
                             label="SMTP Password"
                             type="password"
-                            placeholder="Enter SMTP password"
+                            placeholder="••••••••"
                         />
                     </div>
 
                     <div>
-                        <flux:select wire:model="smtp_encryption" label="SMTP Encryption">
+                        <flux:select wire:model="smtp_encryption" label="Encryption Protocol">
                             <option value="">Select encryption</option>
                             <option value="ssl">SSL</option>
                             <option value="tls">TLS</option>
@@ -313,14 +329,15 @@ new class extends Component {
                         </flux:select>
                     </div>
 
-                    <div class="flex justify-end">
-                        <flux:button type="submit" variant="primary" wire:loading.attr="disabled">
-                            <span wire:loading.remove>Update SMTP Settings</span>
-                            <span wire:loading>Updating...</span>
-                        </flux:button>
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" class="rounded-xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-600 hover:to-amber-700 px-6 py-2.5 text-xs font-semibold text-white transition-all shadow-lg shadow-orange-500/20 active:scale-[0.99] cursor-pointer" wire:loading.attr="disabled">
+                            <span wire:loading.remove>Update SMTP Credentials</span>
+                            <span wire:loading>Saving...</span>
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </x-settings.layout>
 </section>
+

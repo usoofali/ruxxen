@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PosApiController;
 use App\Http\Controllers\Api\SyncController;
 
 /*
@@ -18,6 +19,17 @@ use App\Http\Controllers\Api\SyncController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// POS Desktop Application v1 API routes
+Route::prefix('v1/pos')->group(function () {
+    Route::post('login', [PosApiController::class, 'login']);
+    Route::get('initial-data', [PosApiController::class, 'initialData']);
+    Route::get('stock', [PosApiController::class, 'checkStock']);
+    Route::get('cashier-summary', [PosApiController::class, 'getCashierDailySummary']);
+    Route::post('sync-transactions', [PosApiController::class, 'syncTransactions']);
+    Route::post('cancel-transaction', [PosApiController::class, 'cancelTransaction']);
+});
+
 
 // Sync API routes
 Route::prefix('sync')->group(function () {

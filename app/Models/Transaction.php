@@ -21,6 +21,8 @@ class Transaction extends Model
         'customer_phone',
         'payment_type',
         'notes',
+        'cancellation_reason',
+        'cancelled_at',
         'status',
     ];
 
@@ -28,7 +30,9 @@ class Transaction extends Model
         'quantity_kg' => 'decimal:2',
         'price_per_kg' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'cancelled_at' => 'datetime',
     ];
+
 
     /**
      * Boot method to generate transaction number and create sync log
