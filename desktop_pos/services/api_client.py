@@ -19,7 +19,7 @@ class ApiClient:
             response = requests.post(url, json={"email": email, "password": password}, timeout=5)
             return response.json()
         except requests.exceptions.RequestException as e:
-            return {"success": False, "message": f"Connection error: {str(e)}"}
+            return {"success": False, "message": f"Connection error: {str(e)}", "network_error": True}
 
     def get_initial_data(self, token=None):
         url = f"{self.api_prefix}/initial-data"
@@ -30,7 +30,7 @@ class ApiClient:
             response = requests.get(url, headers=headers, timeout=5)
             return response.json()
         except requests.exceptions.RequestException as e:
-            return {"success": False, "message": f"Connection error: {str(e)}"}
+            return {"success": False, "message": f"Connection error: {str(e)}", "network_error": True}
 
     def check_stock(self, token=None):
         url = f"{self.api_prefix}/stock"
@@ -41,7 +41,7 @@ class ApiClient:
             response = requests.get(url, headers=headers, timeout=5)
             return response.json()
         except requests.exceptions.RequestException as e:
-            return {"success": False, "message": f"Connection error: {str(e)}"}
+            return {"success": False, "message": f"Connection error: {str(e)}", "network_error": True}
 
     def sync_transactions(self, transactions, token=None):
         url = f"{self.api_prefix}/sync-transactions"
@@ -52,4 +52,5 @@ class ApiClient:
             response = requests.post(url, json={"transactions": transactions}, headers=headers, timeout=10)
             return response.json()
         except requests.exceptions.RequestException as e:
-            return {"success": False, "message": f"Connection error: {str(e)}"}
+            return {"success": False, "message": f"Connection error: {str(e)}", "network_error": True}
+

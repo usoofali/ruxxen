@@ -51,10 +51,10 @@ class PySidePosWindow(QMainWindow):
         # Start background sync
         self.sync_worker.start()
 
-        # Periodic stock & status refresh timer (every 15s)
+        # Periodic stock & status refresh timer (every 10s)
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.refresh_stock)
-        self.timer.start(15000)
+        self.timer.timeout.connect(self.periodic_refresh)
+        self.timer.start(10000)
 
     def init_ui(self):
         self.setWindowTitle(f"Ruxxen Gas POS Terminal - Logged in as: {self.cashier_name}")
@@ -221,9 +221,9 @@ class PySidePosWindow(QMainWindow):
         btn_summary.setObjectName("summary_btn")
         btn_summary.clicked.connect(self.show_daily_summary_dialog)
 
-        btn_sync = QPushButton("SYNC NOW")
-        btn_sync.setObjectName("sync_btn")
-        btn_sync.clicked.connect(self.trigger_manual_sync)
+        self.btn_sync = QPushButton("SYNC NOW")
+        self.btn_sync.setObjectName("sync_btn")
+        self.btn_sync.clicked.connect(self.trigger_manual_sync)
 
         btn_logout = QPushButton("LOGOUT")
         btn_logout.setObjectName("logout_btn")
@@ -237,7 +237,7 @@ class PySidePosWindow(QMainWindow):
         header_layout.addSpacing(15)
         header_layout.addWidget(btn_summary)
         header_layout.addSpacing(8)
-        header_layout.addWidget(btn_sync)
+        header_layout.addWidget(self.btn_sync)
         header_layout.addSpacing(8)
         header_layout.addWidget(btn_logout)
 
@@ -346,7 +346,7 @@ class PySidePosWindow(QMainWindow):
         grp_layout.addLayout(cust_layout)
 
         # Checkout Button
-        btn_checkout = QPushButton("PRINT RECEIPT & COMPLETE SALE")
+        btn_checkout = QPushButton("PRINT RECEIPT AND COMPLETE SALE")
         btn_checkout.setObjectName("checkout_btn")
         btn_checkout.clicked.connect(self.process_sale)
         grp_layout.addWidget(btn_checkout)
@@ -527,8 +527,8 @@ class PySidePosWindow(QMainWindow):
 
     def cancel_selected_recent_sale(self):
         selected_row = self.table_sales.currentRow()
-        txns = self.db.get_all_transactions(limit=50)
-        cashier_txns = [t for t in txns if int(t.get('cashier_id', 0)) == self.cashier_id or t.get('cashier_name') == self.cashier_name]
+        txns = self.db.get_all_transactions(limit=100)
+        cashier_txns = [t for t in txns if int(t.get('cashier_id', 0)) == self.cashier_id or t.get('cashier_name') == self.cashier_name][:14]
         
         if selected_row < 0 or selected_row >= len(cashier_txns):
             QMessageBox.warning(self, "Select Sale", "Please click a transaction row in the table to cancel.")
@@ -802,10 +802,21 @@ class PySidePosWindow(QMainWindow):
             if self.on_logout_callback:
                 self.on_logout_callback()
 
+    def periodic_refresh(self):
+        self.refresh_stock()
+        self.refresh_sales_table()
+
     def refresh_sales_table(self):
-        txns = self.db.get_all_transactions(limit=50)
-        # Filter table to cashier's own transactions
-        cashier_txns = [t for t in txns if int(t.get('cashier_id', 0)) == self.cashier_id or t.get('cashier_name') == self.cashier_name]
+        # Update unsynced counter on Sync button
+        pending_count = len(self.db.get_pending_transactions())
+        if pending_count > 0:
+            self.btn_sync.setText(f"SYNC NOW ({pending_count})")
+        else:
+            self.btn_sync.setText("SYNC NOW")
+
+        txns = self.db.get_all_transactions(limit=100)
+        # Filter table to cashier's own transactions (maximum 14 records)
+        cashier_txns = [t for t in txns if int(t.get('cashier_id', 0)) == self.cashier_id or t.get('cashier_name') == self.cashier_name][:14]
         
         self.table_sales.setRowCount(len(cashier_txns))
         for row, t in enumerate(cashier_txns):
@@ -894,8 +905,8 @@ class TkinterPosWindow:
         btn_logout = tk.Button(header, text="LOGOUT", bg="#ef4444", fg="white", font=("Arial", 10, "bold"), command=self.handle_logout)
         btn_logout.pack(side="right", padx=5)
 
-        btn_sync = tk.Button(header, text="SYNC NOW", bg="#0284c7", fg="white", font=("Arial", 10, "bold"), command=self.trigger_manual_sync)
-        btn_sync.pack(side="right", padx=5)
+        self.btn_sync = tk.Button(header, text="SYNC NOW", bg="#0284c7", fg="white", font=("Arial", 10, "bold"), command=self.trigger_manual_sync)
+        self.btn_sync.pack(side="right", padx=5)
 
         btn_summary = tk.Button(header, text="MY DAILY SALES", bg="#8b5cf6", fg="white", font=("Arial", 10, "bold"), command=self.show_daily_summary_dialog)
         btn_summary.pack(side="right", padx=5)
@@ -953,7 +964,7 @@ class TkinterPosWindow:
         self.combo_payment.current(0)
         self.combo_payment.pack(anchor="w", pady=(2, 10))
 
-        btn_checkout = tk.Button(left_frame, text="PRINT RECEIPT & COMPLETE SALE", bg="#16a34a", fg="white", font=("Arial", 12, "bold"), command=self.process_sale, pady=8)
+        btn_checkout = tk.Button(left_frame, text="PRINT RECEIPT AND COMPLETE SALE", bg="#16a34a", fg="white", font=("Arial", 12, "bold"), command=self.process_sale, pady=8)
         btn_checkout.pack(fill="x")
 
         # Right History Table Box & Copy Checkbox Container
@@ -1272,11 +1283,24 @@ class TkinterPosWindow:
             if self.on_logout_callback:
                 self.on_logout_callback()
 
+    def periodic_refresh(self):
+        self.refresh_stock()
+        self.refresh_sales_table()
+        if hasattr(self, 'root') and self.root:
+            self.root.after(10000, self.periodic_refresh)
+
     def refresh_sales_table(self):
+        # Update unsynced counter on Sync button
+        pending_count = len(self.db.get_pending_transactions())
+        if pending_count > 0:
+            self.btn_sync.config(text=f"SYNC NOW ({pending_count})")
+        else:
+            self.btn_sync.config(text="SYNC NOW")
+
         for item in self.tree_sales.get_children():
             self.tree_sales.delete(item)
-        txns = self.db.get_all_transactions(limit=50)
-        cashier_txns = [t for t in txns if int(t.get('cashier_id', 0)) == self.cashier_id or t.get('cashier_name') == self.cashier_name]
+        txns = self.db.get_all_transactions(limit=100)
+        cashier_txns = [t for t in txns if int(t.get('cashier_id', 0)) == self.cashier_id or t.get('cashier_name') == self.cashier_name][:14]
         for t in cashier_txns:
             status_str = "CANCELLED" if t.get('status') == 'cancelled' else str(t.get('sync_status')).upper()
             self.tree_sales.insert("", "end", values=(
