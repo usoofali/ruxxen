@@ -166,7 +166,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                 </span>
                 <span class="text-xs text-slate-500 dark:text-slate-400">{{ now()->format('l, F j, Y') }}</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+            <h1 class="text-xl sm:text-xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Welcome back, <span
                     class="bg-gradient-to-r from-orange-500 to-amber-500 dark:from-orange-400 dark:to-amber-300 bg-clip-text text-transparent">{{ Auth::user()->name }}</span>!
             </h1>
@@ -261,7 +261,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                     <div class="space-y-1">
                         <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active
                             Cashiers</p>
-                        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                        <p class="text-xl sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                             {{ $totalCashiers }}
                         </p>
                     </div>
@@ -289,7 +289,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                         <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Stock
                             Status</p>
                         <p
-                            class="text-2xl sm:text-3xl font-extrabold {{ $inventory->isLowStock() ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' }} tracking-tight">
+                            class="text-xl sm:text-xl font-extrabold {{ $inventory->isLowStock() ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400' }} tracking-tight">
                             {{ $inventory->isLowStock() ? 'Low Stock' : 'Good' }}
                         </p>
                     </div>
@@ -317,7 +317,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                         <div class="space-y-1">
                             <p class="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
                                 Unsynced Logs</p>
-                            <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                            <p class="text-xl sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                                 {{ number_format($unsyncedTransactions) }}
                             </p>
                         </div>
@@ -347,7 +347,7 @@ new #[Layout('components.layouts.app')] class extends Component {
                                         class="relative inline-flex rounded-full h-3 w-3 {{ $isOnline ? 'bg-emerald-500' : 'bg-red-500' }}"></span>
                                 </span>
                                 <p
-                                    class="text-2xl sm:text-3xl font-extrabold {{ $isOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400' }} tracking-tight">
+                                    class="text-xl sm:text-xl font-extrabold {{ $isOnline ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400' }} tracking-tight">
                                     {{ $isOnline ? 'Online' : 'Offline' }}
                                 </p>
                             </div>
